@@ -17,7 +17,7 @@ ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_
 NEWS_API_KEY      = os.getenv("NEWS_API_KEY")
 TELEGRAM_TOKEN    = os.getenv("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID  = os.getenv("TELEGRAM_CHAT_ID")
-GITHUB_TOKEN      = os.getenv("GITHUB_TOKEN")
+GITHUB_TOKEN      = os.environ.get("GIT_TOKEN") or os.getenv("GIT_TOKEN")
 
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
