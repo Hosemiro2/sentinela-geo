@@ -282,6 +282,7 @@ def gerar_html(resultados, relatorio, agora):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="refresh" content="3600">
 <title>SENTINELA — Monitor Geopolítico Global</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600;900&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{{
@@ -317,8 +318,8 @@ nav a:hover{{color:var(--gold);border-color:var(--gold-dim);background:var(--gol
 .map-panel{{position:relative;background:var(--b1);border-right:1px solid var(--b5);padding:24px 28px;overflow:hidden;}}
 .map-panel-title{{font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.2em;color:var(--gold);text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px;}}
 .map-panel-title::before{{content:'';width:20px;height:1px;background:var(--gold);}}
-.world-map-wrap{{position:relative;width:100%;aspect-ratio:2/1;max-height:320px;}}
-.world-map-wrap svg{{width:100%;height:100%;}}
+.world-map-wrap{{position:relative;width:100%;height:320px;}}
+#leafmap{{width:100%;height:100%;background:#080808;}}.leaflet-tile-pane{{filter:brightness(0.35) saturate(0.2);}}
 /* MAP MARKERS */
 .t-marker{{position:absolute;transform:translate(-50%,-50%);cursor:pointer;}}
 .t-ring{{width:16px;height:16px;border-radius:50%;border:2px solid currentColor;display:flex;align-items:center;justify-content:center;position:relative;animation:marker-pulse 3s ease-in-out infinite;}}
@@ -454,42 +455,9 @@ footer{{border-top:1px solid var(--gold-dim);background:var(--b2);padding:20px 3
 <div class="hero" id="mapa">
   <div class="map-panel">
     <div class="map-panel-title">Mapa de Alertas Geopolíticos</div>
-    <div class="world-map-wrap">
-      <svg viewBox="0 0 960 500" xmlns="http://www.w3.org/2000/svg">
-        <rect width="960" height="500" fill="#080808"/>
-        <line x1="0" y1="250" x2="960" y2="250" stroke="#1a1a1a" stroke-width="0.5"/>
-        <line x1="480" y1="0" x2="480" y2="500" stroke="#1a1a1a" stroke-width="0.5"/>
-        <line x1="0" y1="125" x2="960" y2="125" stroke="#111" stroke-width="0.5" stroke-dasharray="4,8"/>
-        <line x1="0" y1="375" x2="960" y2="375" stroke="#111" stroke-width="0.5" stroke-dasharray="4,8"/>
-        <path d="M60 60 L75 55 L120 50 L190 48 L220 60 L245 80 L255 110 L245 145 L220 175 L195 200 L175 215 L155 230 L130 240 L105 245 L80 235 L65 210 L55 180 L50 150 L55 115 L60 85Z" fill="#1C1C1C" stroke="#2a2a2a" stroke-width="0.8"/>
-        <path d="M300 20 L340 15 L365 25 L375 45 L360 65 L330 72 L305 60 L295 40Z" fill="#161616" stroke="#222" stroke-width="0.5"/>
-        <path d="M148 270 L175 265 L210 270 L235 285 L250 310 L260 350 L255 395 L240 435 L215 460 L185 468 L160 455 L140 430 L125 395 L122 355 L130 315 L140 290Z" fill="#1C1C1C" stroke="#2a2a2a" stroke-width="0.8"/>
-        <path d="M148 270 L175 235 L195 250 L185 275 L165 285Z" fill="#1C1C1C" stroke="#2a2a2a" stroke-width="0.6"/>
-        <path d="M390 55 L430 50 L470 52 L500 60 L515 75 L520 100 L510 125 L490 140 L465 148 L440 145 L415 135 L395 115 L385 90 L387 70Z" fill="#1C1C1C" stroke="#2a2a2a" stroke-width="0.8"/>
-        <path d="M430 20 L455 15 L475 25 L480 50 L470 52 L450 48 L435 38Z" fill="#181818" stroke="#2a2a2a" stroke-width="0.6"/>
-        <path d="M500 40 L560 30 L620 28 L680 32 L730 40 L750 60 L745 85 L720 100 L680 110 L630 115 L580 110 L540 100 L510 90 L500 70Z" fill="#1C1C1C" stroke="#2a2a2a" stroke-width="0.8"/>
-        <path d="M680 32 L780 22 L870 20 L930 30 L950 50 L945 75 L920 90 L870 98 L810 100 L750 95 L720 100 L730 40Z" fill="#181818" stroke="#2a2a2a" stroke-width="0.6"/>
-        <path d="M390 155 L440 148 L490 148 L540 155 L580 162 L605 180 L615 210 L610 240 L590 255 L555 260 L510 258 L465 255 L425 248 L395 235 L378 210 L378 185Z" fill="#1C1C1C" stroke="#2a2a2a" stroke-width="0.8"/>
-        <path d="M395 235 L425 248 L465 255 L510 258 L555 260 L590 255 L610 280 L618 320 L610 365 L590 405 L555 435 L515 450 L475 455 L440 445 L410 420 L390 385 L378 340 L375 295 L380 260Z" fill="#1C1C1C" stroke="#2a2a2a" stroke-width="0.8"/>
-        <path d="M540 155 L580 148 L625 145 L660 155 L680 175 L685 205 L668 230 L640 245 L610 248 L580 240 L555 220 L540 195 L538 170Z" fill="#1C1C1C" stroke="#2a2a2a" stroke-width="0.8"/>
-        <path d="M580 200 L625 195 L660 200 L680 220 L685 255 L672 280 L645 295 L610 295 L585 275 L572 245 L570 220Z" fill="#181818" stroke="#2a2a2a" stroke-width="0.6"/>
-        <path d="M640 175 L690 168 L725 178 L745 205 L748 240 L738 270 L715 295 L685 305 L660 295 L645 268 L640 235 L638 200Z" fill="#1C1C1C" stroke="#2a2a2a" stroke-width="0.8"/>
-        <path d="M640 100 L700 90 L760 88 L810 95 L840 110 L838 140 L810 158 L770 165 L725 162 L685 158 L650 148 L635 128Z" fill="#181818" stroke="#2a2a2a" stroke-width="0.6"/>
-        <path d="M750 95 L820 88 L875 90 L915 100 L930 120 L928 150 L910 175 L880 192 L840 200 L800 198 L762 188 L740 165 L738 140 L745 115Z" fill="#1C1C1C" stroke="#2a2a2a" stroke-width="0.8"/>
-        <path d="M890 105 L910 100 L922 112 L918 132 L902 142 L888 132 L882 115Z" fill="#1C1C1C" stroke="#2a2a2a" stroke-width="0.6"/>
-        <path d="M800 195 L840 195 L875 205 L895 225 L890 255 L865 270 L835 268 L808 248 L795 220Z" fill="#181818" stroke="#2a2a2a" stroke-width="0.6"/>
-        <path d="M778 318 L840 308 L890 315 L925 335 L935 370 L920 405 L885 425 L840 430 L800 420 L770 400 L758 368 L758 340Z" fill="#181818" stroke="#2a2a2a" stroke-width="0.6"/>
-        <text x="12" y="254" font-family="monospace" font-size="7" fill="#222" letter-spacing="1">EQUADOR</text>
-      </svg>
-      <div style="position:absolute;inset:0;pointer-events:none;">
-        {map_markers}
-      </div>
-      <div class="map-legend">
-        <div class="legend-item" style="color:var(--red)"><div class="legend-dot" style="border-color:var(--red);background:rgba(184,48,48,0.2)"></div>Crítico 4-5/5</div>
-        <div class="legend-item" style="color:var(--orange)"><div class="legend-dot" style="border-color:var(--orange);background:rgba(200,104,32,0.2)"></div>Alerta 3/5</div>
-        <div class="legend-item" style="color:var(--yellow)"><div class="legend-dot" style="border-color:var(--yellow);background:rgba(184,144,0,0.2)"></div>Atenção 2/5</div>
-        <div class="legend-item" style="color:var(--green)"><div class="legend-dot" style="border-color:var(--green);background:rgba(40,120,72,0.2)"></div>Normal 1/5</div>
-      </div>
+    <div class="world-map-wrap" style="height:320px;position:relative;">
+      <div id="leafmap" style="width:100%;height:100%;border-radius:0;"></div>
+      <div class="map-legend">      </div>
     </div>
   </div>
   <!-- STATUS -->
@@ -678,6 +646,52 @@ mkt('^GDAXI','v-dx','ch-dx','c-dx');mkt('^N225','v-nk','ch-nk','c-nk');
 mkt('BRL=X','v-us','ch-us','c-us');
 com('CL=F','v-oil','ch-oil');com('GC=F','v-gld','ch-gld');com('ZS=F','v-soy','ch-soy');
 com('TIO=F','v-irf','ch-irf');com('ZW=F','v-wht','ch-wht');
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+// LEAFLET MAP
+const THEATERS_GEO = [
+  {{name:"Brasil x EUA/Paraguai", lat:-15.8, lng:-47.9, nivel:{resultados.get("brasil_eua",{}).get("analise",{}).get("nivel",1)}, tid:"brasil_eua"}},
+  {{name:"Russia x Ucrania/OTAN", lat:50.4, lng:30.5, nivel:{resultados.get("russia_otan",{}).get("analise",{}).get("nivel",1)}, tid:"russia_otan"}},
+  {{name:"Europa/Balticos/Balcas", lat:54.7, lng:25.3, nivel:{resultados.get("europa",{}).get("analise",{}).get("nivel",1)}, tid:"europa"}},
+  {{name:"China x Taiwan/Pacifico", lat:25.0, lng:121.5, nivel:{resultados.get("china_taiwan",{}).get("analise",{}).get("nivel",1)}, tid:"china_taiwan"}},
+  {{name:"Indo-Pacifico/Coreia/Japao", lat:35.7, lng:139.7, nivel:{resultados.get("indo_pacifico",{}).get("analise",{}).get("nivel",1)}, tid:"indo_pacifico"}},
+  {{name:"Oriente Medio/Golfo Persico", lat:29.3, lng:47.9, nivel:{resultados.get("oriente_medio",{}).get("analise",{}).get("nivel",1)}, tid:"oriente_medio"}},
+  {{name:"America Latina/Cone Sul", lat:-23.5, lng:-46.6, nivel:{resultados.get("america_latina",{}).get("analise",{}).get("nivel",1)}, tid:"america_latina"}},
+  {{name:"Africa/Sahel/Chifre", lat:15.5, lng:32.5, nivel:{resultados.get("africa",{}).get("analise",{}).get("nivel",1)}, tid:"africa"}},
+  {{name:"Cyber/Guerra Digital", lat:48.9, lng:2.3, nivel:{resultados.get("cyber",{}).get("analise",{}).get("nivel",1)}, tid:"cyber"}},
+];
+const NV_COLORS = {{1:"#287848",2:"#B89000",3:"#C86820",4:"#B83030",5:"#7B0000"}};
+const NV_LABELS = {{1:"NORMAL",2:"ATENCAO",3:"ALERTA",4:"CRITICO",5:"CATASTROFE"}};
+
+function initMap(){{
+  const map = L.map('leafmap', {{
+    center: [20, 10], zoom: 2,
+    zoomControl: true,
+    attributionControl: false,
+    minZoom: 1, maxZoom: 6
+  }});
+  L.tileLayer('https://{{s}}.basemaps.cartocdn.com/dark_all/{{z}}/{{x}}/{{y}}{{r}}.png', {{
+    subdomains: 'abcd', maxZoom: 6
+  }}).addTo(map);
+
+  THEATERS_GEO.forEach(t => {{
+    const cor = NV_COLORS[t.nivel] || '#C9A84C';
+    const icon = L.divIcon({{
+      className: '',
+      html: `<div style="width:14px;height:14px;border-radius:50%;border:2px solid ${{cor}};background:${{cor}}33;box-shadow:0 0 8px ${{cor}}88;animation:marker-pulse 3s infinite"></div>`,
+      iconSize: [14,14], iconAnchor: [7,7]
+    }});
+    const marker = L.marker([t.lat, t.lng], {{icon}}).addTo(map);
+    marker.bindPopup(`
+      <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:.1em;color:#C9A84C;background:#0C0C0C;border:1px solid #6B5420;padding:8px 12px;min-width:180px;">
+        <div style="font-weight:900;margin-bottom:4px">${{t.name}}</div>
+        <div style="color:${{cor}};font-size:13px">Nível ${{t.nivel}}/5 — ${{NV_LABELS[t.nivel]}}</div>
+      </div>
+    `, {{className:'sentinela-popup'}});
+  }});
+}}
+if(document.getElementById('leafmap')) initMap();
 </script>
 </body>
 </html>"""
