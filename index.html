@@ -3,697 +3,380 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="refresh" content="3600">
 <title>SENTINELA — Monitor Geopolítico Global</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
-:root {
-  --gold: #C9A84C; --gold-light: #E8C97A; --gold-dim: #5A4820;
-  --black: #060606; --b2: #0E0E0E; --b3: #161616; --b4: #1E1E1E; --b5: #262626;
-  --white: #F0EAD6; --white-dim: #7A7060;
-  --red: #C0392B; --orange: #E07020; --yellow: #C9A000; --green: #27AE60; --blue: #2471A3;
-}
+:root{--gold:#C9A84C;--gold-dim:#5A4820;--black:#060606;--b2:#0E0E0E;--b3:#161616;--b4:#1E1E1E;--b5:#262626;--white:#F0EAD6;--white-dim:#7A7060;--red:#C0392B;--orange:#E07020;--yellow:#C9A000;--green:#27AE60;}
 *{margin:0;padding:0;box-sizing:border-box;}
-html{scroll-behavior:smooth;}
-body{background:var(--black);color:var(--white);font-family:'Crimson Pro',serif;font-size:16px;line-height:1.6;overflow-x:hidden;}
-
-/* GRAIN */
-body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.5;}
-
-/* HEADER */
-header{position:sticky;top:0;z-index:500;background:rgba(6,6,6,.97);backdrop-filter:blur(16px);border-bottom:1px solid var(--gold-dim);display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:60px;}
-.logo{font-family:'Cinzel',serif;font-size:20px;font-weight:900;letter-spacing:.18em;color:var(--gold);display:flex;align-items:center;gap:10px;}
-.logo svg{width:28px;height:28px;}
-.header-right{display:flex;align-items:center;gap:24px;}
-nav{display:flex;gap:2px;}
-nav a{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.12em;color:var(--white-dim);text-decoration:none;padding:5px 12px;border:1px solid transparent;transition:all .2s;cursor:pointer;}
-nav a:hover{color:var(--gold);border-color:var(--gold-dim);background:rgba(201,168,76,.05);}
-.live{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold);}
+body{background:var(--black);color:var(--white);font-family:'Crimson Pro',serif;font-size:16px;line-height:1.6;}
+header{position:sticky;top:0;z-index:500;background:rgba(6,6,6,.97);backdrop-filter:blur(16px);border-bottom:1px solid var(--gold-dim);display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:58px;}
+.logo{font-family:'Cinzel',serif;font-size:19px;font-weight:900;letter-spacing:.16em;color:var(--gold);display:flex;align-items:center;gap:10px;}
+.logo svg{width:26px;height:26px;}
+nav a{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.1em;color:var(--white-dim);text-decoration:none;padding:5px 11px;border:1px solid transparent;transition:all .2s;margin-left:2px;}
+nav a:hover{color:var(--gold);border-color:var(--gold-dim);}
+.live{display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold);}
 .live-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:blink 2s infinite;}
 @keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
-
-/* ALERT BANNER */
-.banner{background:linear-gradient(90deg,rgba(224,112,32,.12),rgba(201,168,76,.04));border-bottom:1px solid rgba(224,112,32,.25);padding:10px 32px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
-.banner-level{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.1em;color:var(--orange);display:flex;align-items:center;gap:8px;white-space:nowrap;}
-.badge{background:var(--orange);color:#000;font-weight:700;padding:1px 8px;font-size:11px;}
+.banner{background:linear-gradient(90deg,rgba(192,57,43,0.12),rgba(201,168,76,0.03));border-bottom:1px solid rgba(192,57,43,0.3);padding:10px 28px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.badge{background:#C0392B;color:#000;font-weight:700;padding:2px 10px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.08em;}
 .banner-text{font-style:italic;flex:1;font-size:14px;opacity:.85;}
 .banner-time{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--white-dim);white-space:nowrap;}
-
-/* LAYOUT */
-.layout{display:grid;grid-template-columns:1fr 340px;min-height:calc(100vh - 80px);}
+.layout{display:grid;grid-template-columns:1fr 320px;min-height:calc(100vh - 80px);}
 .main{border-right:1px solid var(--b4);}
 .sidebar{background:var(--b2);}
-
-/* SECTION */
-.sec-head{padding:16px 28px;border-bottom:1px solid var(--b4);display:flex;align-items:center;justify-content:space-between;}
-.sec-title{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;display:flex;align-items:center;gap:8px;}
-.sec-title::before{content:'';width:16px;height:1px;background:var(--gold);}
-.sec-meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--white-dim);}
-
-/* MAP */
-.map-wrap{padding:24px 28px;border-bottom:1px solid var(--b4);}
-.map-container{position:relative;background:var(--b2);border:1px solid var(--b4);height:300px;overflow:hidden;}
-.map-container svg{width:100%;height:100%;}
-.map-overlay{position:absolute;inset:0;pointer-events:none;}
-
-/* Theaters grid */
-.theaters{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--b4);border-bottom:1px solid var(--b4);}
-.theater-card{background:var(--black);padding:16px 20px;transition:background .15s;cursor:pointer;position:relative;overflow:hidden;}
-.theater-card:hover{background:var(--b2);}
-.theater-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
-.tc-l3::before{background:var(--orange);}
-.tc-l2::before{background:var(--yellow);}
-.tc-l1::before{background:var(--green);}
-.theater-name{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.08em;color:var(--white-dim);margin-bottom:6px;}
-.theater-level{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
-.level-num{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:300;}
-.l3{color:var(--orange);}
-.l2{color:var(--yellow);}
-.l1{color:var(--green);}
-.level-label{font-size:11px;color:var(--white-dim);}
-.theater-headline{font-size:12px;color:var(--white);opacity:.7;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.kpi-row{display:flex;gap:12px;margin-top:8px;}
-.kpi{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--white-dim);display:flex;flex-direction:column;gap:2px;}
-.kpi span{color:var(--gold);font-size:10px;}
-
-/* KPI DASHBOARD */
+.sec-head{padding:14px 24px;border-bottom:1px solid var(--b4);display:flex;align-items:center;justify-content:space-between;}
+.sec-title{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;display:flex;align-items:center;gap:8px;}
+.sec-title::before{content:'';width:14px;height:1px;background:var(--gold);}
+.sec-meta{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--white-dim);}
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--b4);border-bottom:1px solid var(--b4);}
-.kpi-card{background:var(--black);padding:20px;text-align:center;}
-.kpi-card:hover{background:var(--b2);}
-.kpi-icon{font-size:22px;margin-bottom:8px;}
-.kpi-value{font-family:'Cinzel',serif;font-size:28px;color:var(--gold);line-height:1;}
-.kpi-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--white-dim);letter-spacing:.1em;margin-top:6px;text-transform:uppercase;}
-.kpi-sub{font-size:11px;color:var(--white-dim);margin-top:4px;font-style:italic;}
-
-/* NEWS FEED */
-.news-feed{border-bottom:1px solid var(--b4);}
-.news-filters{padding:12px 28px;border-bottom:1px solid var(--b4);display:flex;gap:8px;flex-wrap:wrap;}
-.filter-btn{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;padding:4px 10px;border:1px solid var(--b5);background:transparent;color:var(--white-dim);cursor:pointer;transition:all .15s;text-transform:uppercase;}
-.filter-btn:hover,.filter-btn.active{border-color:var(--gold-dim);color:var(--gold);background:rgba(201,168,76,.05);}
-.news-item{padding:16px 28px;border-bottom:1px solid var(--b3);display:grid;grid-template-columns:auto 1fr;gap:16px;cursor:pointer;transition:background .15s;}
-.news-item:hover{background:var(--b2);}
-.news-level-bar{width:3px;border-radius:2px;align-self:stretch;}
+.kpi-card{background:var(--black);padding:18px 16px;text-align:center;}
+.kpi-icon{font-size:20px;margin-bottom:6px;}
+.kpi-value{font-family:'Cinzel',serif;font-size:26px;color:var(--gold);line-height:1;}
+.kpi-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--white-dim);letter-spacing:.08em;margin-top:5px;text-transform:uppercase;}
+.kpi-sub{font-size:11px;color:var(--white-dim);margin-top:3px;font-style:italic;}
+.theater-card{padding:16px 24px;border-bottom:1px solid var(--b3);transition:background .15s;}
+.theater-card:hover{background:var(--b2);}
+.tc-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;}
+.tc-name{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.08em;color:var(--white-dim);text-transform:uppercase;}
+.tc-level{font-size:12px;margin-top:2px;}
+.tc-num{font-family:'Cinzel',serif;font-size:36px;font-weight:900;line-height:1;opacity:.6;}
+.tc-resumo{font-size:14px;color:var(--white);margin-bottom:8px;font-style:italic;}
+.tc-kpis{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+.kpi-pill{font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 8px;border:1px solid var(--b5);color:var(--white-dim);}
+.tc-eventos{font-size:12px;color:var(--white-dim);padding-left:16px;margin-bottom:8px;}
+.tc-eventos li{margin-bottom:2px;}
+.tc-news{margin-top:8px;}
+.news-item{display:flex;gap:8px;margin-bottom:6px;}
+.news-bar{width:2px;flex-shrink:0;border-radius:1px;}
 .news-body{}
-.news-meta{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;}
-.news-theater{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.1em;color:var(--gold);text-transform:uppercase;}
-.news-source{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--white-dim);}
-.news-time{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--b5);}
-.news-title{font-size:15px;color:var(--white);margin-bottom:4px;line-height:1.4;}
-.news-summary{font-size:13px;color:var(--white-dim);font-style:italic;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.source-link{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--gold-dim);text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-top:6px;}
-.source-link:hover{color:var(--gold);}
-
-/* MARKETS SIDEBAR */
-.market-section{padding:20px 20px 0;}
-.market-title{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.15em;color:var(--gold);text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
-.market-title::before{content:'';width:12px;height:1px;background:var(--gold);}
-.market-item{padding:12px 0;border-bottom:1px solid var(--b3);display:flex;align-items:center;justify-content:space-between;}
-.market-name{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--white);}
+.news-src{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--white-dim);display:block;}
+.news-title{font-size:12px;color:var(--white);text-decoration:none;line-height:1.3;display:block;}
+.news-title:hover{color:var(--gold);}
+.narrativa-section{padding:20px 24px;border-bottom:1px solid var(--b4);background:var(--b2);}
+.narrativa-text{font-size:15px;line-height:1.7;font-style:italic;color:var(--white);opacity:.9;margin-bottom:12px;}
+.rec-box{background:var(--b3);border-left:3px solid var(--gold);padding:12px 16px;font-size:14px;}
+.rec-label{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.12em;color:var(--gold);margin-bottom:4px;}
+.gatilhos{padding:16px 24px;border-bottom:1px solid var(--b4);}
+.gatilhos ul{list-style:none;font-size:13px;color:var(--white-dim);}
+.gatilhos li{padding:4px 0;border-bottom:1px solid var(--b3);}
+.safehouse-alert{padding:12px 24px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.08em;text-align:center;border-bottom:1px solid var(--b4);}
+.safehouse-danger{background:rgba(192,57,43,.2);color:#E74C3C;border-color:rgba(192,57,43,.4);animation:pulse-bg 2s infinite;}
+.safehouse-ok{background:rgba(39,174,96,.1);color:var(--green);border-color:rgba(39,174,96,.2);}
+@keyframes pulse-bg{0%,100%{opacity:1;}50%{opacity:.7;}}
+.market-section{padding:16px 16px 0;}
+.market-title{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.14em;color:var(--gold);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:7px;}
+.market-title::before{content:'';width:10px;height:1px;background:var(--gold);}
+.market-item{padding:10px 0;border-bottom:1px solid var(--b3);display:flex;align-items:center;justify-content:space-between;}
+.market-name{font-family:'JetBrains Mono',monospace;font-size:11px;}
 .market-sub{font-size:10px;color:var(--white-dim);}
-.market-price{text-align:right;}
-.price-val{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--white);}
-.price-chg{font-family:'JetBrains Mono',monospace;font-size:10px;}
-.up{color:#27AE60;} .down{color:var(--red);}
-.mini-chart{width:60px;height:24px;}
-
-/* COMMODITIES */
-.commodity-item{padding:10px 0;border-bottom:1px solid var(--b3);display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;}
+.price-val{font-family:'JetBrains Mono',monospace;font-size:12px;text-align:right;}
+.price-chg{font-family:'JetBrains Mono',monospace;font-size:10px;text-align:right;}
+.up{color:#27AE60;}.down{color:var(--red);}
+.commodity-item{padding:9px 0;border-bottom:1px solid var(--b3);display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;}
 .commodity-name{font-size:13px;}
-.commodity-price{font-family:'JetBrains Mono',monospace;font-size:12px;text-align:right;}
-.commodity-chg{font-family:'JetBrains Mono',monospace;font-size:10px;text-align:right;min-width:50px;}
-
-/* ALERT LOG */
-.alert-log{padding:16px 20px;}
-.log-item{padding:10px 0;border-bottom:1px solid var(--b3);display:flex;gap:10px;align-items:flex-start;}
-.log-icon{font-size:14px;flex-shrink:0;margin-top:2px;}
+.commodity-price{font-family:'JetBrains Mono',monospace;font-size:11px;text-align:right;}
+.commodity-chg{font-family:'JetBrains Mono',monospace;font-size:10px;text-align:right;min-width:48px;}
+.alert-log{padding:12px 16px;}
+.log-item{padding:8px 0;border-bottom:1px solid var(--b3);display:flex;gap:8px;}
 .log-text{font-size:12px;line-height:1.4;}
 .log-time{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--white-dim);margin-top:2px;}
-
-/* FOOTER */
-footer{border-top:1px solid var(--gold-dim);padding:20px 32px;display:flex;align-items:center;justify-content:space-between;background:var(--b2);}
-.footer-logo{font-family:'Cinzel',serif;font-size:12px;letter-spacing:.15em;color:var(--gold-dim);}
+footer{border-top:1px solid var(--gold-dim);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;background:var(--b2);}
+.footer-logo{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.14em;color:var(--gold-dim);}
 .footer-info{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--white-dim);text-align:right;}
-
-/* SPARKLINE */
 canvas.sparkline{display:block;}
-
-/* RESPONSIVE */
-@media(max-width:900px){
-  .layout{grid-template-columns:1fr;}
-  .sidebar{border-top:1px solid var(--b4);}
-  .theaters{grid-template-columns:1fr;}
-  .kpi-grid{grid-template-columns:repeat(2,1fr);}
-}
+@media(max-width:860px){.layout{grid-template-columns:1fr;}.kpi-grid{grid-template-columns:repeat(2,1fr);}}
 </style>
 </head>
 <body>
-
-<!-- HEADER -->
 <header>
   <div class="logo">
-    <svg viewBox="0 0 28 28" fill="none">
-      <path d="M14 2L26 7V15C26 21 20 26 14 27C8 26 2 21 2 15V7L14 2Z" stroke="#C9A84C" stroke-width="1.5" fill="rgba(201,168,76,0.08)"/>
-      <path d="M9 14L12 17L19 11" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
+    <svg viewBox="0 0 28 28" fill="none"><path d="M14 2L26 7V15C26 21 20 26 14 27C8 26 2 21 2 15V7L14 2Z" stroke="#C9A84C" stroke-width="1.5" fill="rgba(201,168,76,0.08)"/><path d="M9 14L12 17L19 11" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
     SENTINELA
   </div>
   <nav>
-    <a href="#mapa" onclick="scrollTo('mapa')">Mapa</a>
-    <a href="#kpis" onclick="scrollTo('kpis')">KPIs</a>
-    <a href="#noticias" onclick="scrollTo('noticias')">Notícias</a>
-    <a href="#mercados" onclick="scrollTo('mercados')">Mercados</a>
+    <a href="#kpis">KPIs</a>
+    <a href="#teatros">Teatros</a>
+    <a href="#noticias">Notícias</a>
+    <a href="#mercados">Mercados</a>
   </nav>
-  <div class="header-right">
-    <div class="live"><div class="live-dot"></div>AO VIVO</div>
-  </div>
+  <div class="live"><div class="live-dot"></div>AO VIVO</div>
 </header>
 
-<!-- ALERT BANNER -->
 <div class="banner">
-  <div class="banner-level">
-    <span class="badge">NÍVEL 3/5</span>
-    🟠 ALERTA GLOBAL
-  </div>
-  <div class="banner-text">Paraguai libera presença militar americana enquanto Irã fecha Estreito de Ormuz — impacto direto no Brasil</div>
-  <div class="banner-time" id="banner-time">—</div>
+  <span class="badge">NÍVEL 4/5 — CRITICO</span>
+  <div class="banner-text">Escalada Militar EUA-Irã Ameaça Estreito de Ormuz</div>
+  <div class="banner-time">10/03/2026 00:13 (Brasília)</div>
 </div>
 
 <div class="layout">
 <div class="main">
 
-  <!-- MAP -->
-  <div id="mapa">
-    <div class="sec-head">
-      <div class="sec-title">Mapa de Alertas Geopolíticos</div>
-      <div class="sec-meta" id="last-update">Última atualização: —</div>
+  <!-- SAFEHOUSE -->
+  <div class="safehouse-alert safehouse-danger">
+      🔴 PROTOCOLO ACIONADO — MOVA FAMÍLIA PARA SAPUCAÍ MIRIM IMEDIATAMENTE
     </div>
-    <div class="map-wrap">
-      <div class="map-container" id="mapContainer">
-        <!-- SVG world map simplified -->
-        <svg viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg" style="opacity:.25;position:absolute;inset:0;">
-          <!-- Continentes simplificados -->
-          <!-- América do Norte -->
-          <path d="M80 80 L200 70 L220 100 L240 140 L200 180 L160 200 L120 220 L80 200 L60 160 L70 120Z" fill="#2a2a2a" stroke="#3a3a3a" stroke-width="1"/>
-          <!-- América Central -->
-          <path d="M160 200 L200 220 L190 250 L160 260 L140 240Z" fill="#2a2a2a" stroke="#3a3a3a" stroke-width="1"/>
-          <!-- América do Sul -->
-          <path d="M160 260 L220 270 L240 300 L250 360 L220 420 L180 440 L150 400 L130 360 L140 300 L150 280Z" fill="#2a2a2a" stroke="#3a3a3a" stroke-width="1"/>
-          <!-- Europa -->
-          <path d="M420 60 L500 55 L520 80 L510 120 L470 130 L430 120 L410 100Z" fill="#2a2a2a" stroke="#3a3a3a" stroke-width="1"/>
-          <!-- África -->
-          <path d="M430 150 L510 140 L540 180 L550 260 L520 340 L480 360 L440 340 L410 280 L410 200Z" fill="#2a2a2a" stroke="#3a3a3a" stroke-width="1"/>
-          <!-- Rússia/Ásia Norte -->
-          <path d="M510 40 L750 30 L800 70 L780 110 L700 120 L600 110 L520 90Z" fill="#2a2a2a" stroke="#3a3a3a" stroke-width="1"/>
-          <!-- Oriente Médio -->
-          <path d="M520 130 L600 120 L630 160 L610 200 L560 210 L520 190Z" fill="#2a2a2a" stroke="#3a3a3a" stroke-width="1"/>
-          <!-- Índia -->
-          <path d="M620 160 L680 150 L700 200 L680 260 L640 270 L620 230Z" fill="#2a2a2a" stroke="#3a3a3a" stroke-width="1"/>
-          <!-- China/Ásia -->
-          <path d="M680 80 L800 75 L840 110 L830 170 L780 190 L700 180 L670 150 L680 110Z" fill="#2a2a2a" stroke="#3a3a3a" stroke-width="1"/>
-          <!-- Japão/Coreia -->
-          <path d="M840 100 L870 95 L880 120 L860 140 L840 130Z" fill="#2a2a2a" stroke="#3a3a3a" stroke-width="1"/>
-          <!-- Oceania -->
-          <path d="M780 300 L860 290 L880 340 L840 370 L790 360 L770 330Z" fill="#2a2a2a" stroke="#3a3a3a" stroke-width="1"/>
-        </svg>
 
-        <!-- Theater markers overlay -->
-        <div style="position:absolute;inset:0;">
-          <!-- Brasil x EUA/Paraguai -->
-          <div class="theater-marker" style="left:19%;top:68%;" title="Brasil x EUA / Paraguai">
-            <div class="marker-ring marker-level-3"><div class="marker-dot dot-3"></div></div>
-          </div>
-          <!-- América Latina -->
-          <div class="theater-marker" style="left:17%;top:58%;" title="América Latina / Cone Sul">
-            <div class="marker-ring marker-level-2"><div class="marker-dot dot-2"></div></div>
-          </div>
-          <!-- Europa -->
-          <div class="theater-marker" style="left:46%;top:22%;" title="Europa / Bálticos / Balcãs">
-            <div class="marker-ring marker-level-3"><div class="marker-dot dot-3"></div></div>
-          </div>
-          <!-- Rússia/Ucrânia -->
-          <div class="theater-marker" style="left:54%;top:18%;" title="Rússia x Ucrânia / OTAN">
-            <div class="marker-ring marker-level-3"><div class="marker-dot dot-3"></div></div>
-          </div>
-          <!-- Oriente Médio -->
-          <div class="theater-marker" style="left:57%;top:40%;" title="Oriente Médio / Golfo Pérsico">
-            <div class="marker-ring marker-level-3"><div class="marker-dot dot-3"></div></div>
-          </div>
-          <!-- África -->
-          <div class="theater-marker" style="left:47%;top:52%;" title="África / Sahel">
-            <div class="marker-ring marker-level-2"><div class="marker-dot dot-2"></div></div>
-          </div>
-          <!-- China/Taiwan -->
-          <div class="theater-marker" style="left:78%;top:36%;" title="China x Taiwan / Pacífico">
-            <div class="marker-ring marker-level-3"><div class="marker-dot dot-3"></div></div>
-          </div>
-          <!-- Coreia/Japão -->
-          <div class="theater-marker" style="left:84%;top:28%;" title="Indo-Pacífico / Coreia / Japão">
-            <div class="marker-ring marker-level-2"><div class="marker-dot dot-2"></div></div>
-          </div>
-          <!-- Cyber (global) -->
-          <div class="theater-marker" style="left:50%;top:10%;" title="Cyber / Guerra Digital">
-            <div class="marker-ring marker-level-2"><div class="marker-dot dot-2"></div></div>
-          </div>
-        </div>
-
-        <!-- Legend -->
-        <div style="position:absolute;bottom:12px;right:12px;display:flex;gap:16px;">
-          <div style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--orange);">
-            <div style="width:8px;height:8px;border-radius:50%;background:var(--orange);"></div> Alerta 3/5
-          </div>
-          <div style="display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--yellow);">
-            <div style="width:8px;height:8px;border-radius:50%;background:var(--yellow);"></div> Atenção 2/5
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- THEATERS GRID -->
-  <div class="theaters">
-    <div class="theater-card tc-l3">
-      <div class="theater-name">🇧🇷 BRASIL × EUA / PARAGUAI</div>
-      <div class="theater-level"><span class="level-num l3">3</span><span class="level-label">/5 — Alerta</span></div>
-      <div class="theater-headline">Paraguai aprova presença militar americana na fronteira. Lula reforça defesa nacional.</div>
-      <div class="kpi-row">
-        <div class="kpi">ESCALADA<span>↑ +1</span></div>
-        <div class="kpi">FONTES<span>15</span></div>
-        <div class="kpi">DIAS EM ALERTA<span>3</span></div>
-      </div>
-    </div>
-    <div class="theater-card tc-l3">
-      <div class="theater-name">🇷🇺 RÚSSIA × UCRÂNIA / OTAN</div>
-      <div class="theater-level"><span class="level-num l3">3</span><span class="level-label">/5 — Alerta</span></div>
-      <div class="theater-headline">Escalada militar no Leste Europeu com mortes de soldados americanos em ação encoberta.</div>
-      <div class="kpi-row">
-        <div class="kpi">ESCALADA<span>↑ +1</span></div>
-        <div class="kpi">FONTES<span>2</span></div>
-        <div class="kpi">DIAS EM ALERTA<span>7</span></div>
-      </div>
-    </div>
-    <div class="theater-card tc-l3">
-      <div class="theater-name">🇪🇺 EUROPA / BÁLTICOS / BALCÃS</div>
-      <div class="theater-level"><span class="level-num l3">3</span><span class="level-label">/5 — Alerta</span></div>
-      <div class="theater-headline">Europa acelera preparativos militares. Planos de evacuação em massa e expansão nuclear francesa.</div>
-      <div class="kpi-row">
-        <div class="kpi">ESCALADA<span>↑ +1</span></div>
-        <div class="kpi">FONTES<span>0</span></div>
-        <div class="kpi">CONTÁGIO<span>Alto</span></div>
-      </div>
-    </div>
-    <div class="theater-card tc-l3">
-      <div class="theater-name">🇨🇳 CHINA × TAIWAN / PACÍFICO</div>
-      <div class="theater-level"><span class="level-num l3">3</span><span class="level-label">/5 — Alerta</span></div>
-      <div class="theater-headline">Fechamento do Estreito de Ormuz impacta supply chains globais e rotas do Pacífico.</div>
-      <div class="kpi-row">
-        <div class="kpi">ESCALADA<span>↑ +1</span></div>
-        <div class="kpi">FONTES<span>1</span></div>
-        <div class="kpi">CONTÁGIO<span>Alto</span></div>
-      </div>
-    </div>
-    <div class="theater-card tc-l2">
-      <div class="theater-name">🌏 INDO-PACÍFICO / COREIA / JAPÃO</div>
-      <div class="theater-level"><span class="level-num l2">2</span><span class="level-label">/5 — Atenção</span></div>
-      <div class="theater-headline">Remilitarização japonesa e deterrência nuclear francesa criam nova dinâmica multipolar.</div>
-      <div class="kpi-row">
-        <div class="kpi">ESCALADA<span>→ 0</span></div>
-        <div class="kpi">FONTES<span>2</span></div>
-        <div class="kpi">CONTÁGIO<span>Médio</span></div>
-      </div>
-    </div>
-    <div class="theater-card tc-l3">
-      <div class="theater-name">🕌 ORIENTE MÉDIO / GOLFO PÉRSICO</div>
-      <div class="theater-level"><span class="level-num l3">3</span><span class="level-label">/5 — Alerta</span></div>
-      <div class="theater-headline">EUA-Israel vs Irã: Estreito de Ormuz fechado, ameaça ao petróleo do Golfo.</div>
-      <div class="kpi-row">
-        <div class="kpi">ESCALADA<span>↑ +2</span></div>
-        <div class="kpi">FONTES<span>15</span></div>
-        <div class="kpi">DIAS EM ALERTA<span>5</span></div>
-      </div>
-    </div>
-    <div class="theater-card tc-l2">
-      <div class="theater-name">🌍 ÁFRICA / SAHEL / CHIFRE</div>
-      <div class="theater-level"><span class="level-num l2">2</span><span class="level-label">/5 — Atenção</span></div>
-      <div class="theater-headline">Instabilidade no Sudão, tensões EUA-Ruanda e possível escalada do conflito Irã-Israel na África.</div>
-      <div class="kpi-row">
-        <div class="kpi">ESCALADA<span>→ 0</span></div>
-        <div class="kpi">FONTES<span>1</span></div>
-        <div class="kpi">CONTÁGIO<span>Baixo</span></div>
-      </div>
-    </div>
-    <div class="theater-card tc-l2">
-      <div class="theater-name">🌐 CYBER / GUERRA DIGITAL</div>
-      <div class="theater-level"><span class="level-num l2">2</span><span class="level-label">/5 — Atenção</span></div>
-      <div class="theater-headline">Ataques via OAuth em alta. Infraestrutura crítica europeia sob pressão.</div>
-      <div class="kpi-row">
-        <div class="kpi">ESCALADA<span>↑ +1</span></div>
-        <div class="kpi">FONTES<span>0</span></div>
-        <div class="kpi">CONTÁGIO<span>Global</span></div>
-      </div>
-    </div>
-    <div class="theater-card tc-l2">
-      <div class="theater-name">🌎 AMÉRICA LATINA / CONE SUL</div>
-      <div class="theater-level"><span class="level-num l2">2</span><span class="level-label">/5 — Atenção</span></div>
-      <div class="theater-headline">Cuba em crise histórica. Venezuela sob pressão internacional crescente.</div>
-      <div class="kpi-row">
-        <div class="kpi">ESCALADA<span>→ 0</span></div>
-        <div class="kpi">FONTES<span>0</span></div>
-        <div class="kpi">CONTÁGIO<span>Médio</span></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- KPI DASHBOARD -->
+  <!-- KPIs -->
   <div id="kpis">
-    <div class="sec-head">
-      <div class="sec-title">Indicadores Globais</div>
-    </div>
+    <div class="sec-head"><div class="sec-title">Indicadores Globais</div><div class="sec-meta">Atualizado: 10/03/2026 00:13</div></div>
     <div class="kpi-grid">
-      <div class="kpi-card">
-        <div class="kpi-icon">🔴</div>
-        <div class="kpi-value" style="color:var(--orange);">3/5</div>
-        <div class="kpi-label">Nível Global</div>
-        <div class="kpi-sub">Deteriorando</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-icon">⚡</div>
-        <div class="kpi-value">6</div>
-        <div class="kpi-label">Teatros em Alerta</div>
-        <div class="kpi-sub">de 9 monitorados</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-icon">📡</div>
-        <div class="kpi-value">36</div>
-        <div class="kpi-label">Fontes Ativas</div>
-        <div class="kpi-sub">Últimas 24h</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-icon">📈</div>
-        <div class="kpi-value" style="color:var(--red);">↑78%</div>
-        <div class="kpi-label">Prob. Conflito</div>
-        <div class="kpi-sub">Score composto</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-icon">🌐</div>
-        <div class="kpi-value" style="color:var(--orange);">Alto</div>
-        <div class="kpi-label">Contágio Regional</div>
-        <div class="kpi-sub">5 teatros interligados</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-icon">⏱️</div>
-        <div class="kpi-value">7</div>
-        <div class="kpi-label">Dias em Alerta</div>
-        <div class="kpi-sub">Nível ≥3 consecutivo</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-icon">💰</div>
-        <div class="kpi-value" style="color:var(--red);">Alto</div>
-        <div class="kpi-label">Impacto BR</div>
-        <div class="kpi-sub">Combustível + inflação</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-icon">🏔️</div>
-        <div class="kpi-value" style="color:var(--green);">✓</div>
-        <div class="kpi-label">Sapucaí Mirim</div>
-        <div class="kpi-sub">Posição estratégica</div>
-      </div>
+      <div class="kpi-card"><div class="kpi-icon">🛡️</div><div class="kpi-value" style="color:#C0392B">4/5</div><div class="kpi-label">Nível Global</div><div class="kpi-sub">CRITICO</div></div>
+      <div class="kpi-card"><div class="kpi-icon">⚡</div><div class="kpi-value">4</div><div class="kpi-label">Teatros em Alerta</div><div class="kpi-sub">de 9 monitorados</div></div>
+      <div class="kpi-card"><div class="kpi-icon">📡</div><div class="kpi-value">47</div><div class="kpi-label">Fontes Coletadas</div><div class="kpi-sub">Últimas 24h</div></div>
+      <div class="kpi-card"><div class="kpi-icon">📈</div><div class="kpi-value" style="color:var(--red)">80%</div><div class="kpi-label">Prob. Escalada</div><div class="kpi-sub">Score composto</div></div>
+      <div class="kpi-card"><div class="kpi-icon">🎯</div><div class="kpi-value" style="font-size:14px;padding-top:4px">Brasil x EUA / Parag</div><div class="kpi-label">Teatro Crítico</div><div class="kpi-sub">Maior risco hoje</div></div>
+      <div class="kpi-card"><div class="kpi-icon">🌐</div><div class="kpi-value">Médio</div><div class="kpi-label">Contágio Regional</div><div class="kpi-sub">4 teatros interligados</div></div>
+      <div class="kpi-card"><div class="kpi-icon">⏱️</div><div class="kpi-value" id="hora-local">—</div><div class="kpi-label">Hora Brasília</div><div class="kpi-sub">Tempo real</div></div>
+      <div class="kpi-card"><div class="kpi-icon">🏔️</div><div class="kpi-value" style="color:var(--green);font-size:18px;padding-top:4px">ATIVO</div><div class="kpi-label">Sapucaí Mirim</div><div class="kpi-sub">Protocolo ativo</div></div>
     </div>
   </div>
 
-  <!-- NEWS FEED -->
-  <div id="noticias">
-    <div class="sec-head">
-      <div class="sec-title">Feed de Notícias</div>
-      <div class="sec-meta">Com fontes verificadas</div>
-    </div>
-    <div class="news-filters">
-      <button class="filter-btn active" onclick="filterNews('all',this)">Todos</button>
-      <button class="filter-btn" onclick="filterNews('brasil_eua',this)">Brasil×EUA</button>
-      <button class="filter-btn" onclick="filterNews('oriente_medio',this)">Or. Médio</button>
-      <button class="filter-btn" onclick="filterNews('europa',this)">Europa</button>
-      <button class="filter-btn" onclick="filterNews('china',this)">China×Taiwan</button>
-      <button class="filter-btn" onclick="filterNews('cyber',this)">Cyber</button>
-    </div>
-    <div id="news-container">
-      <!-- Notícias geradas dinamicamente -->
-    </div>
+  <!-- NARRATIVA -->
+  <div class="narrativa-section">
+    <div class="sec-title" style="margin-bottom:12px;">Análise do Dia</div>
+    <div class="narrativa-text">Confronto direto entre EUA e Irã intensifica com ameaças de fechamento do Estreito de Ormuz e ataques a embarcações. Trump considera operações especiais contra programa nuclear iraniano enquanto Lula demonstra preocupação com defesa nacional. Múltiplos teatros deteriorando simultaneamente criam ambiente de alta volatilidade global.</div>
+    <div class="rec-box"><div class="rec-label">Ação Recomendada Hoje</div>Acelerar estoque de combustível e gêneros alimentícios não-perecíveis em Sapucaí Mirim devido ao risco iminente de choque energético global</div>
+  </div>
+
+  <!-- GATILHOS -->
+  <div class="gatilhos">
+    <div class="sec-head" style="padding:0;border:0;margin-bottom:10px;"><div class="sec-title">Gatilhos Ativos</div></div>
+    <ul><li>⚡ Fechamento Estreito de Ormuz</li><li>⚡ Escalada Militar EUA-Irã</li><li>⚡ Ameaças Energéticas Globais</li></ul>
+  </div>
+
+  <!-- TEATROS -->
+  <div id="teatros">
+    <div class="sec-head"><div class="sec-title">9 Teatros Geopolíticos</div></div>
+    
+        <div class="theater-card" style="border-left:3px solid #E07020">
+          <div class="tc-header">
+            <div>
+              <div class="tc-name">Brasil x EUA / Paraguai</div>
+              <div class="tc-level" style="color:#E07020">3/5 — ALERTA</div>
+            </div>
+            <div class="tc-num" style="color:#E07020">3</div>
+          </div>
+          <div class="tc-resumo">Conflito Iran-EUA escalando com ameaças de Trump sobre energia e Lula citando necessidade de reforçar defesa brasileira</div>
+          <div class="tc-kpis">
+            <span class="kpi-pill">Tendência ↑</span>
+            <span class="kpi-pill">Fontes: 15</span>
+            <span class="kpi-pill">Peso: 3</span>
+          </div>
+          <ul class="tc-eventos"><li>Trump ameaça atacar Irã mais duramente se bloquear fornecimento de energia</li><li>Putin oferece propostas para fim da guerra no Irã em conversa com Trump</li><li>Lula menciona preocupação com conflito no Irã e necessidade de ampliar defesa</li><li>Lula fala em reforçar Defesa: 'senão alguém invade a gente'</li><li>Ataques no Golfo Pérsico continuam durante conflito Iran-EUA</li></ul>
+          <div class="tc-news"><div class="news-item"><div class="news-bar" style="background:#E07020"></div><div class="news-body"><span class="news-src">agenciabrasil.ebc.com.br</span><a href="https://agenciabrasil.ebc.com.br/politica/noticia/2026-03/lula-e-presidenta-do-mexico-querem-reunir-empresarios-dos-dois-paises" target="_blank" class="news-title">Lula e presidenta do México querem reunir empresários dos dois países</a></div></div><div class="news-item"><div class="news-bar" style="background:#E07020"></div><div class="news-body"><span class="news-src">agenciabrasil.ebc.com.br</span><a href="https://agenciabrasil.ebc.com.br/politica/noticia/2026-03/lula-cita-preocupacao-com-conflito-no-ira-e-fala-em-ampliar-defesa-do-pais" target="_blank" class="news-title">Lula cita preocupação com conflito no Irã e fala em ampliar defesa</a></div></div><div class="news-item"><div class="news-bar" style="background:#E07020"></div><div class="news-body"><span class="news-src">agenciabrasil.ebc.com.br</span><a href="https://agenciabrasil.ebc.com.br/politica/noticia/2026-03/lula-recebe-presidente-da-africa-do-sul-para-visita-de-estado" target="_blank" class="news-title">Lula recebe presidente da África do Sul para visita de Estado</a></div></div></div>
+        </div>
+        <div class="theater-card" style="border-left:3px solid #C9A000">
+          <div class="tc-header">
+            <div>
+              <div class="tc-name">Russia x Ucrania / OTAN</div>
+              <div class="tc-level" style="color:#C9A000">2/5 — ATENCAO</div>
+            </div>
+            <div class="tc-num" style="color:#C9A000">2</div>
+          </div>
+          <div class="tc-resumo">Sinais diplomáticos emergentes com diálogo Putin-Trump e flexibilização de sanções à Índia sugerem possível desescalada.</div>
+          <div class="tc-kpis">
+            <span class="kpi-pill">Tendência ↓</span>
+            <span class="kpi-pill">Fontes: 2</span>
+            <span class="kpi-pill">Peso: 2</span>
+          </div>
+          <ul class="tc-eventos"><li>Putin oferece propostas para fim da guerra em conversa com Trump</li><li>EUA autorizam Índia a retomar compras de petróleo russo</li></ul>
+          <div class="tc-news"><div class="news-item"><div class="news-bar" style="background:#C9A000"></div><div class="news-body"><span class="news-src">feeds.folha.uol.com.br</span><a href="https://redir.folha.com.br/redir/online/mundo/rss091/*https://www1.folha.uol.com.br/mundo/2026/03/putin-conversa-com-trump-e-oferece-propostas-para-fim-da-guerra-no-ira-diz-kremlin.shtml" target="_blank" class="news-title">Putin conversa com Trump e oferece propostas para fim da guerra no Irã, diz Kremlin</a></div></div><div class="news-item"><div class="news-bar" style="background:#C9A000"></div><div class="news-body"><span class="news-src">rss.dw.com</span><a href="https://www.dw.com/en/why-the-us-says-india-can-buy-russian-oil-again/a-76250096?maca=en-rss-en-world-4025-rdf" target="_blank" class="news-title">Why the US says India can buy Russian oil again</a></div></div></div>
+        </div>
+        <div class="theater-card" style="border-left:3px solid #27AE60">
+          <div class="tc-header">
+            <div>
+              <div class="tc-name">Europa / Balticos / Balcas</div>
+              <div class="tc-level" style="color:#27AE60">1/5 — NORMAL</div>
+            </div>
+            <div class="tc-num" style="color:#27AE60">1</div>
+          </div>
+          <div class="tc-resumo">Sem noticias relevantes.</div>
+          <div class="tc-kpis">
+            <span class="kpi-pill">Tendência →</span>
+            <span class="kpi-pill">Fontes: 0</span>
+            <span class="kpi-pill">Peso: 1</span>
+          </div>
+          
+          
+        </div>
+        <div class="theater-card" style="border-left:3px solid #E07020">
+          <div class="tc-header">
+            <div>
+              <div class="tc-name">China x Taiwan / Pacifico</div>
+              <div class="tc-level" style="color:#E07020">3/5 — ALERTA</div>
+            </div>
+            <div class="tc-num" style="color:#E07020">3</div>
+          </div>
+          <div class="tc-resumo">Escalada Iran-EUA com fechamento Ormuz ameaça supply chains globais e preços energia.</div>
+          <div class="tc-kpis">
+            <span class="kpi-pill">Tendência ↑</span>
+            <span class="kpi-pill">Fontes: 4</span>
+            <span class="kpi-pill">Peso: 2</span>
+          </div>
+          <ul class="tc-eventos"><li>Submarino americano afundou embarcação iraniana no Pacífico</li><li>Irã declarou fechamento do Estreito de Ormuz</li><li>Dependência iraniana de exportações para China cria tensões geopolíticas</li></ul>
+          <div class="tc-news"><div class="news-item"><div class="news-bar" style="background:#E07020"></div><div class="news-body"><span class="news-src">Freerepublic.com</span><a href="https://freerepublic.com/focus/f-chat/4369840/posts" target="_blank" class="news-title">GENTLEMEN’S AGREEMENTS</a></div></div><div class="news-item"><div class="news-bar" style="background:#E07020"></div><div class="news-body"><span class="news-src">Honolulu Star-Advertiser</span><a href="https://www.staradvertiser.com/2026/03/08/hawaii-news/pearl-harbor-based-sub-sank-iranian-vessel/" target="_blank" class="news-title">Pearl Harbor-based sub sank Iranian vessel | Honolulu Star-Advertiser</a></div></div><div class="news-item"><div class="news-bar" style="background:#E07020"></div><div class="news-body"><span class="news-src">BBC News</span><a href="https://www.bbc.com/portuguese/articles/crk8r6j1p2ro" target="_blank" class="news-title">Irã diz que Estreito de Ormuz foi fechado: qual é sua importância e quais podem ser as consequências</a></div></div></div>
+        </div>
+        <div class="theater-card" style="border-left:3px solid #E07020">
+          <div class="tc-header">
+            <div>
+              <div class="tc-name">Indo-Pacifico / Coreia / Japao</div>
+              <div class="tc-level" style="color:#E07020">3/5 — ALERTA</div>
+            </div>
+            <div class="tc-num" style="color:#E07020">3</div>
+          </div>
+          <div class="tc-resumo">Tensões militares escalando no Indo-Pacífico com confrontos diretos EUA-Irã e remilitarização chinesa-japonesa.</div>
+          <div class="tc-kpis">
+            <span class="kpi-pill">Tendência ↑</span>
+            <span class="kpi-pill">Fontes: 8</span>
+            <span class="kpi-pill">Peso: 1</span>
+          </div>
+          <ul class="tc-eventos"><li>Ataque americano contra navio de guerra iraniano testando neutralidade indiana</li><li>China implementa medidas contra remilitarização acelerada do Japão</li><li>França estende dissuasão nuclear aos aliados europeus</li><li>Operação Epic Fury cria dilema estratégico complexo na Índia</li></ul>
+          <div class="tc-news"><div class="news-item"><div class="news-bar" style="background:#E07020"></div><div class="news-body"><span class="news-src">Theaviationist.com</span><a href="https://theaviationist.com/2026/03/08/france-extends-nuclear-deterrence/" target="_blank" class="news-title">France Extends Nuclear Deterrence to European Allies – What Does This Mean for European Security?</a></div></div><div class="news-item"><div class="news-bar" style="background:#E07020"></div><div class="news-body"><span class="news-src">Livemint</span><a href="https://www.livemint.com/opinion/columns/us-iran-war-operation-epic-fury-11772865763222.html" target="_blank" class="news-title">Operation Epic Fury sparks a high-stakes balancing act in India</a></div></div><div class="news-item"><div class="news-bar" style="background:#E07020"></div><div class="news-body"><span class="news-src">Globalsecurity.org</span><a href="https://www.globalsecurity.org/wmd/library/news/japan/2026/japan-260303-pdo01.htm" target="_blank" class="news-title">China implements measures to counter Japan's accelerating remilitarization</a></div></div></div>
+        </div>
+        <div class="theater-card" style="border-left:3px solid #E07020">
+          <div class="tc-header">
+            <div>
+              <div class="tc-name">Oriente Medio / Golfo Persico</div>
+              <div class="tc-level" style="color:#E07020">3/5 — ALERTA</div>
+            </div>
+            <div class="tc-num" style="color:#E07020">3</div>
+          </div>
+          <div class="tc-resumo">Escalada militar EUA-Iran com operações especiais cogitadas e ataques diretos testando neutralidade global</div>
+          <div class="tc-kpis">
+            <span class="kpi-pill">Tendência ↑</span>
+            <span class="kpi-pill">Fontes: 15</span>
+            <span class="kpi-pill">Peso: 2</span>
+          </div>
+          <ul class="tc-eventos"><li>EUA considera operação especial para apreender urânio iraniano</li><li>Ataque americano contra navio de guerra iraniano testa neutralidade da Índia</li><li>Israel invade novas áreas no sul do Líbano contra Hezbollah</li><li>Questão sobre quando países do Golfo podem parar de bombear petróleo devido à guerra</li></ul>
+          <div class="tc-news"><div class="news-item"><div class="news-bar" style="background:#E07020"></div><div class="news-body"><span class="news-src">The Times of India</span><a href="https://timesofindia.indiatimes.com/city/goa/delhi-man-booked-for-smoking-beedi-on-flight/articleshow/129305133.cms" target="_blank" class="news-title">Passenger booked for smoking beedi mid-air on Delhi-Goa Akasa Air flight</a></div></div><div class="news-item"><div class="news-bar" style="background:#E07020"></div><div class="news-body"><span class="news-src">CBS News</span><a href="https://www.cbsnews.com/news/us-iran-war-bombing-girls-school-assessment/" target="_blank" class="news-title">U.S. "likely" responsible for bombing of girls' school in Iran, per early U.S. assessment</a></div></div><div class="news-item"><div class="news-bar" style="background:#E07020"></div><div class="news-body"><span class="news-src">The Times of India</span><a href="https://economictimes.indiatimes.com/news/defence/in-wars-first-week-a-punishing-military-campaign-with-no-coherent-endgame/articleshow/129304048.cms" target="_blank" class="news-title">In war's first week, a punishing military campaign with no coherent endgame</a></div></div></div>
+        </div>
+        <div class="theater-card" style="border-left:3px solid #C9A000">
+          <div class="tc-header">
+            <div>
+              <div class="tc-name">America Latina / Cone Sul</div>
+              <div class="tc-level" style="color:#C9A000">2/5 — ATENCAO</div>
+            </div>
+            <div class="tc-num" style="color:#C9A000">2</div>
+          </div>
+          <div class="tc-resumo">Cuba em crise sistêmica severa enquanto Trump planeja pressão máxima sobre regimes autoritários latino-americanos.</div>
+          <div class="tc-kpis">
+            <span class="kpi-pill">Tendência ↑</span>
+            <span class="kpi-pill">Fontes: 2</span>
+            <span class="kpi-pill">Peso: 2</span>
+          </div>
+          <ul class="tc-eventos"><li>Cuba enfrenta maior crise desde a Revolução com colapso econômico e fome generalizada</li><li>Trump considera replicar estratégia de pressão venezuelana contra o Irã</li></ul>
+          <div class="tc-news"><div class="news-item"><div class="news-bar" style="background:#C9A000"></div><div class="news-body"><span class="news-src">BBC News</span><a href="https://www.bbc.com/portuguese/articles/cvgkkn5g3ymo" target="_blank" class="news-title">'Todo dia, a mesma fome, a mesma miséria': por que a Revolução Cubana enfrenta a maior ameaça da sua história</a></div></div><div class="news-item"><div class="news-bar" style="background:#C9A000"></div><div class="news-body"><span class="news-src">BBC News</span><a href="https://www.bbc.com/portuguese/articles/c78xl1lj6j1o" target="_blank" class="news-title">Trump pode replicar no Irã a solução que conseguiu na Venezuela após prisão de Maduro?</a></div></div></div>
+        </div>
+        <div class="theater-card" style="border-left:3px solid #C9A000">
+          <div class="tc-header">
+            <div>
+              <div class="tc-name">Africa / Sahel / Chifre da Africa</div>
+              <div class="tc-level" style="color:#C9A000">2/5 — ATENCAO</div>
+            </div>
+            <div class="tc-num" style="color:#C9A000">2</div>
+          </div>
+          <div class="tc-resumo">EUA classificam Irmandade Muçulmana sudanesa como grupo terrorista, escalando tensões regionais.</div>
+          <div class="tc-kpis">
+            <span class="kpi-pill">Tendência ↑</span>
+            <span class="kpi-pill">Fontes: 1</span>
+            <span class="kpi-pill">Peso: 1</span>
+          </div>
+          <ul class="tc-eventos"><li>Estados Unidos incluem Irmandade Muçulmana do Sudão em lista de organizações terroristas</li></ul>
+          <div class="tc-news"><div class="news-item"><div class="news-bar" style="background:#C9A000"></div><div class="news-body"><span class="news-src">www.aljazeera.com</span><a href="https://www.aljazeera.com/news/2026/3/9/us-blacklists-sudanese-muslim-brotherhood-as-terrorist-group?traffic_source=rss" target="_blank" class="news-title">US blacklists Sudanese Muslim Brotherhood as ‘terrorist’ group</a></div></div></div>
+        </div>
+        <div class="theater-card" style="border-left:3px solid #27AE60">
+          <div class="tc-header">
+            <div>
+              <div class="tc-name">Cyber / Guerra Digital Global</div>
+              <div class="tc-level" style="color:#27AE60">1/5 — NORMAL</div>
+            </div>
+            <div class="tc-num" style="color:#27AE60">1</div>
+          </div>
+          <div class="tc-resumo">Sem noticias relevantes.</div>
+          <div class="tc-kpis">
+            <span class="kpi-pill">Tendência →</span>
+            <span class="kpi-pill">Fontes: 0</span>
+            <span class="kpi-pill">Peso: 2</span>
+          </div>
+          
+          
+        </div>
   </div>
 
 </div><!-- /main -->
 
 <!-- SIDEBAR -->
 <div class="sidebar" id="mercados">
-
-  <!-- MERCADOS -->
-  <div class="sec-head" style="background:var(--b2);">
-    <div class="sec-title">Mercados</div>
-    <div class="live" style="font-size:9px;"><div class="live-dot" style="width:5px;height:5px;"></div>Tempo real</div>
-  </div>
-
+  <div class="sec-head" style="background:var(--b2);"><div class="sec-title">Mercados</div><div class="live" style="font-size:9px;"><div class="live-dot" style="width:5px;height:5px;"></div>Tempo real</div></div>
   <div class="market-section">
     <div class="market-title">Bolsas de Valores</div>
-    <div id="stocks-container">
-      <div class="market-item">
-        <div><div class="market-name">S&P 500</div><div class="market-sub">EUA · SPX</div></div>
-        <canvas class="sparkline mini-chart" id="sp500-chart"></canvas>
-        <div class="market-price"><div class="price-val" id="sp500-val">—</div><div class="price-chg" id="sp500-chg">—</div></div>
-      </div>
-      <div class="market-item">
-        <div><div class="market-name">IBOVESPA</div><div class="market-sub">Brasil · IBOV</div></div>
-        <canvas class="sparkline mini-chart" id="ibov-chart"></canvas>
-        <div class="market-price"><div class="price-val" id="ibov-val">—</div><div class="price-chg" id="ibov-chg">—</div></div>
-      </div>
-      <div class="market-item">
-        <div><div class="market-name">DAX</div><div class="market-sub">Alemanha</div></div>
-        <canvas class="sparkline mini-chart" id="dax-chart"></canvas>
-        <div class="market-price"><div class="price-val" id="dax-val">—</div><div class="price-chg" id="dax-chg">—</div></div>
-      </div>
-      <div class="market-item">
-        <div><div class="market-name">Nikkei 225</div><div class="market-sub">Japão</div></div>
-        <canvas class="sparkline mini-chart" id="nikkei-chart"></canvas>
-        <div class="market-price"><div class="price-val" id="nikkei-val">—</div><div class="price-chg" id="nikkei-chg">—</div></div>
-      </div>
-      <div class="market-item">
-        <div><div class="market-name">USD/BRL</div><div class="market-sub">Câmbio</div></div>
-        <canvas class="sparkline mini-chart" id="usd-chart"></canvas>
-        <div class="market-price"><div class="price-val" id="usd-val">—</div><div class="price-chg" id="usd-chg">—</div></div>
-      </div>
-    </div>
+    <div class="market-item"><div><div class="market-name">S&P 500</div><div class="market-sub">EUA · SPX</div></div><canvas class="sparkline" id="sp500-c" width="55" height="22"></canvas><div><div class="price-val" id="sp500-v">—</div><div class="price-chg" id="sp500-ch">—</div></div></div>
+    <div class="market-item"><div><div class="market-name">IBOVESPA</div><div class="market-sub">Brasil · IBOV</div></div><canvas class="sparkline" id="ibov-c" width="55" height="22"></canvas><div><div class="price-val" id="ibov-v">—</div><div class="price-chg" id="ibov-ch">—</div></div></div>
+    <div class="market-item"><div><div class="market-name">DAX</div><div class="market-sub">Alemanha</div></div><canvas class="sparkline" id="dax-c" width="55" height="22"></canvas><div><div class="price-val" id="dax-v">—</div><div class="price-chg" id="dax-ch">—</div></div></div>
+    <div class="market-item"><div><div class="market-name">Nikkei 225</div><div class="market-sub">Japão</div></div><canvas class="sparkline" id="nkk-c" width="55" height="22"></canvas><div><div class="price-val" id="nkk-v">—</div><div class="price-chg" id="nkk-ch">—</div></div></div>
+    <div class="market-item"><div><div class="market-name">USD/BRL</div><div class="market-sub">Câmbio</div></div><canvas class="sparkline" id="usd-c" width="55" height="22"></canvas><div><div class="price-val" id="usd-v">—</div><div class="price-chg" id="usd-ch">—</div></div></div>
 
-    <div class="market-title" style="margin-top:20px;">Commodities Estratégicas</div>
-    <div id="commodities-container">
-      <div class="commodity-item">
-        <div class="commodity-name">🛢️ Petróleo WTI</div>
-        <div class="commodity-price" id="oil-val">—</div>
-        <div class="commodity-chg" id="oil-chg">—</div>
-      </div>
-      <div class="commodity-item">
-        <div class="commodity-name">🥇 Ouro</div>
-        <div class="commodity-price" id="gold-val">—</div>
-        <div class="commodity-chg" id="gold-chg">—</div>
-      </div>
-      <div class="commodity-item">
-        <div class="commodity-name">🌽 Soja</div>
-        <div class="commodity-price" id="soy-val">—</div>
-        <div class="commodity-chg" id="soy-chg">—</div>
-      </div>
-      <div class="commodity-item">
-        <div class="commodity-name">⚙️ Minério de Ferro</div>
-        <div class="commodity-price" id="iron-val">—</div>
-        <div class="commodity-chg" id="iron-chg">—</div>
-      </div>
-      <div class="commodity-item">
-        <div class="commodity-name">🌾 Trigo</div>
-        <div class="commodity-price" id="wheat-val">—</div>
-        <div class="commodity-chg" id="wheat-chg">—</div>
-      </div>
-    </div>
+    <div class="market-title" style="margin-top:16px;">Commodities Estratégicas</div>
+    <div class="commodity-item"><div class="commodity-name">🛢️ Petróleo WTI</div><div class="commodity-price" id="oil-v">—</div><div class="commodity-chg" id="oil-ch">—</div></div>
+    <div class="commodity-item"><div class="commodity-name">🥇 Ouro</div><div class="commodity-price" id="gold-v">—</div><div class="commodity-chg" id="gold-ch">—</div></div>
+    <div class="commodity-item"><div class="commodity-name">🌽 Soja</div><div class="commodity-price" id="soy-v">—</div><div class="commodity-chg" id="soy-ch">—</div></div>
+    <div class="commodity-item"><div class="commodity-name">⚙️ Minério Ferro</div><div class="commodity-price" id="iron-v">—</div><div class="commodity-chg" id="iron-ch">—</div></div>
+    <div class="commodity-item"><div class="commodity-name">🌾 Trigo</div><div class="commodity-price" id="wht-v">—</div><div class="commodity-chg" id="wht-ch">—</div></div>
 
-    <!-- ALERT LOG -->
-    <div class="market-title" style="margin-top:20px;">Log de Alertas</div>
+    <div class="market-title" style="margin-top:16px;">Log de Alertas</div>
     <div class="alert-log">
-      <div class="log-item">
-        <div class="log-icon">🟠</div>
-        <div><div class="log-text">Estreito de Ormuz fechado pelo Irã — risco de alta do petróleo</div><div class="log-time">09/03/2026 22:53</div></div>
-      </div>
-      <div class="log-item">
-        <div class="log-icon">🔴</div>
-        <div><div class="log-text">Protocolo acionado: mover família para Sapucaí Mirim</div><div class="log-time">09/03/2026 22:53</div></div>
-      </div>
-      <div class="log-item">
-        <div class="log-icon">🟠</div>
-        <div><div class="log-text">Paraguai aprova presença militar EUA na fronteira com BR</div><div class="log-time">09/03/2026 22:53</div></div>
-      </div>
-      <div class="log-item">
-        <div class="log-icon">🟡</div>
-        <div><div class="log-text">Europa acelera planos de evacuação em massa</div><div class="log-time">09/03/2026 22:53</div></div>
-      </div>
-      <div class="log-item">
-        <div class="log-icon">⚡</div>
-        <div><div class="log-text">Ataques cibernéticos via OAuth em infraestruturas críticas</div><div class="log-time">09/03/2026 22:53</div></div>
-      </div>
+      <div class="log-item"><div>🔴</div><div><div class="log-text">Escalada Militar EUA-Irã Ameaça Estreito de Ormuz</div><div class="log-time">10/03/2026 00:13</div></div></div>
+      <div class="log-item"><div>⚡</div><div><div class="log-text">Fechamento Estreito de Ormuz</div><div class="log-time">10/03/2026 00:13</div></div></div><div class="log-item"><div>⚡</div><div><div class="log-text">Escalada Militar EUA-Irã</div><div class="log-time">10/03/2026 00:13</div></div></div><div class="log-item"><div>⚡</div><div><div class="log-text">Ameaças Energéticas Globais</div><div class="log-time">10/03/2026 00:13</div></div></div>
+      <div class="log-item"><div>📍</div><div><div class="log-text">Posição defensiva no refúgio mantida, com atenção máxima aos desenvolvimentos en</div><div class="log-time">10/03/2026 00:13</div></div></div>
+      <div class="log-item"><div>🔮</div><div><div class="log-text">Possível intensificação do conflito EUA-Irã com impacto direto nos preços de com</div><div class="log-time">Próx. 24h</div></div></div>
     </div>
   </div>
-</div><!-- /sidebar -->
+</div>
 </div><!-- /layout -->
 
 <footer>
-  <div class="footer-logo">🛡️ SENTINELA v3.2 — Monitor Geopolítico Global</div>
-  <div class="footer-info">
-    Dados coletados via NewsAPI + RSS · Análise via Claude AI<br>
-    Atualizado automaticamente 4× ao dia · GitHub Actions
-  </div>
+  <div class="footer-logo">🛡️ SENTINELA v4.0 — Monitor Geopolítico Global</div>
+  <div class="footer-info">Dados: NewsAPI + RSS · Análise: Claude AI<br>Atualizado 4× ao dia via GitHub Actions · 10/03/2026 00:13</div>
 </footer>
 
 <script>
-// ── NOTÍCIAS (dados do último relatório Sentinela) ──
-const newsData = [
-  { theater:'brasil_eua', level:3, title:'Paraguai aprova presença militar americana nas fronteiras', summary:'O Senado paraguaio aprovou resolução permitindo operações militares dos EUA na fronteira com o Brasil, gerando reação imediata de Brasília.', source:'Reuters', sourceUrl:'https://reuters.com', time:'09/03 22:00' },
-  { theater:'brasil_eua', level:3, title:'Lula declara necessidade urgente de reforçar defesa nacional', summary:'O presidente Lula convocou reunião de emergência do Conselho de Defesa após aprovação paraguaia de bases militares americanas.', source:'Folha de S.Paulo', sourceUrl:'https://folha.uol.com.br', time:'09/03 20:00' },
-  { theater:'oriente_medio', level:3, title:'Irã fecha Estreito de Ormuz após afundamento de embarcação pelos EUA', summary:'O Irã anunciou o fechamento do Estreito de Ormuz, rota por onde passa 20% do petróleo mundial, impactando diretamente importações brasileiras.', source:'Al Jazeera', sourceUrl:'https://aljazeera.com', time:'09/03 18:00' },
-  { theater:'oriente_medio', level:3, title:'EUA e Israel realizam operações especiais no Golfo Pérsico', summary:'Fontes militares confirmam operações especiais conjuntas EUA-Israel em resposta a ataques iranianos a embarcações no Golfo.', source:'BBC', sourceUrl:'https://bbc.com', time:'09/03 16:00' },
-  { theater:'europa', level:3, title:'Europa ativa planos de evacuação em massa em países bálticos', summary:'Alemanha, França e Polônia coordenam exercícios de evacuação em larga escala enquanto OTAN reforça flancos leste.', source:'Deutsche Welle', sourceUrl:'https://dw.com', time:'09/03 14:00' },
-  { theater:'europa', level:3, title:'França estende deterrência nuclear a países aliados da OTAN', summary:'Macron anuncia extensão do guarda-chuva nuclear francês a membros da OTAN europeus, marcando mudança histórica na política de defesa.', source:'Le Monde', sourceUrl:'https://lemonde.fr', time:'09/03 12:00' },
-  { theater:'china', level:3, title:'Cadeia de suprimentos global impactada pelo fechamento do Ormuz', summary:'Empresas chinesas e taiwanesas redirecionam rotas comerciais após fechamento do Estreito de Ormuz, elevando custos de transporte em 40%.', source:'Financial Times', sourceUrl:'https://ft.com', time:'09/03 10:00' },
-  { theater:'cyber', level:2, title:'Ataques cibernéticos exploram vulnerabilidades OAuth em infraestruturas', summary:'Grupos APT vinculados à Rússia exploram falhas em protocolos OAuth para invadir infraestruturas críticas europeias e americanas.', source:'Wired', sourceUrl:'https://wired.com', time:'09/03 08:00' },
-];
+function updateTime(){const n=new Date();document.getElementById('hora-local').textContent=n.toLocaleTimeString('pt-BR',{timeZone:'America/Sao_Paulo',hour:'2-digit',minute:'2-digit'});}
+updateTime();setInterval(updateTime,10000);
 
-let currentFilter = 'all';
-
-function filterNews(filter, btn) {
-  currentFilter = filter;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderNews();
+async function fetchMarket(sym,vid,cid,cvs){
+  try{
+    const url=`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=5d`;
+    const proxy=`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const r=await fetch(proxy);const data=await r.json();
+    const result=JSON.parse(data.contents).chart.result[0];
+    const closes=result.indicators.quote[0].close.filter(Boolean);
+    const cur=closes[closes.length-1],prev=closes[closes.length-2];
+    const chg=((cur-prev)/prev*100).toFixed(2);const up=chg>=0;
+    document.getElementById(vid).textContent=cur>10000?cur.toLocaleString('pt-BR',{maximumFractionDigits:0}):(sym.includes('BRL')?'R$ ':'')+cur.toFixed(2);
+    const el=document.getElementById(cid);el.textContent=(up?'▲':'▼')+Math.abs(chg)+'%';el.className='price-chg '+(up?'up':'down');
+    if(cvs){const c=document.getElementById(cvs);if(c){const ctx=c.getContext('2d');const mn=Math.min(...closes),mx=Math.max(...closes),rng=mx-mn||1;ctx.clearRect(0,0,55,22);ctx.beginPath();ctx.strokeStyle=up?'#27AE60':'#C0392B';ctx.lineWidth=1.5;closes.forEach((v,i)=>{const x=(i/(closes.length-1))*53+1,y=20-((v-mn)/rng*18);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.stroke();}}
+  }catch(e){}
 }
-
-function renderNews() {
-  const container = document.getElementById('news-container');
-  const filtered = currentFilter === 'all' ? newsData : newsData.filter(n => n.theater === currentFilter);
-  container.innerHTML = filtered.map(n => {
-    const color = n.level === 3 ? 'var(--orange)' : n.level === 2 ? 'var(--yellow)' : 'var(--green)';
-    return `
-    <div class="news-item">
-      <div class="news-level-bar" style="background:${color};"></div>
-      <div class="news-body">
-        <div class="news-meta">
-          <span class="news-theater">${theaterLabel(n.theater)}</span>
-          <span class="news-source">${n.source}</span>
-          <span class="news-time">${n.time}</span>
-        </div>
-        <div class="news-title">${n.title}</div>
-        <div class="news-summary">${n.summary}</div>
-        <a class="source-link" href="${n.sourceUrl}" target="_blank">↗ Ver fonte original: ${n.source}</a>
-      </div>
-    </div>`;
-  }).join('');
+async function fetchCom(sym,vid,cid,pfx='$'){
+  try{
+    const url=`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=2d`;
+    const proxy=`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const r=await fetch(proxy);const data=await r.json();
+    const result=JSON.parse(data.contents).chart.result[0];
+    const closes=result.indicators.quote[0].close.filter(Boolean);
+    const cur=closes[closes.length-1],prev=closes[closes.length-2]||cur;
+    const chg=((cur-prev)/prev*100).toFixed(2);const up=chg>=0;
+    document.getElementById(vid).textContent=pfx+cur.toFixed(2);
+    const el=document.getElementById(cid);el.textContent=(up?'▲':'▼')+Math.abs(chg)+'%';el.className='commodity-chg '+(up?'up':'down');
+  }catch(e){}
 }
-
-function theaterLabel(t) {
-  const labels = { brasil_eua:'Brasil×EUA', oriente_medio:'Or. Médio', europa:'Europa', china:'China×Taiwan', cyber:'Cyber', russia:'Rússia×OTAN' };
-  return labels[t] || t;
-}
-
-// ── MERCADOS via API gratuita (Yahoo Finance via allorigins proxy) ──
-async function fetchMarket(symbol, valId, chgId, chartId) {
-  try {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=5d`;
-    const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-    const res = await fetch(proxy);
-    const data = await res.json();
-    const parsed = JSON.parse(data.contents);
-    const result = parsed.chart.result[0];
-    const closes = result.indicators.quote[0].close.filter(Boolean);
-    const current = closes[closes.length - 1];
-    const prev = closes[closes.length - 2];
-    const chg = ((current - prev) / prev * 100).toFixed(2);
-    const isUp = chg >= 0;
-
-    document.getElementById(valId).textContent = formatVal(symbol, current);
-    const chgEl = document.getElementById(chgId);
-    chgEl.textContent = (isUp ? '▲' : '▼') + ' ' + Math.abs(chg) + '%';
-    chgEl.className = 'price-chg ' + (isUp ? 'up' : 'down');
-
-    if (chartId) drawSparkline(chartId, closes, isUp);
-  } catch(e) {
-    document.getElementById(valId).textContent = '—';
-  }
-}
-
-function formatVal(symbol, val) {
-  if (!val) return '—';
-  if (symbol === 'BRL=X' || symbol === 'USDBRL=X') return 'R$ ' + val.toFixed(2);
-  if (val > 10000) return val.toLocaleString('pt-BR', {maximumFractionDigits:0});
-  return val.toFixed(2);
-}
-
-function drawSparkline(canvasId, data, isUp) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  canvas.width = 60; canvas.height = 24;
-  const min = Math.min(...data), max = Math.max(...data);
-  const range = max - min || 1;
-  ctx.clearRect(0, 0, 60, 24);
-  ctx.beginPath();
-  ctx.strokeStyle = isUp ? '#27AE60' : '#C0392B';
-  ctx.lineWidth = 1.5;
-  data.forEach((v, i) => {
-    const x = (i / (data.length - 1)) * 58 + 1;
-    const y = 22 - ((v - min) / range * 20);
-    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-  });
-  ctx.stroke();
-}
-
-// ── COMMODITIES ──
-async function fetchCommodity(symbol, valId, chgId, prefix='$') {
-  try {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=2d`;
-    const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-    const res = await fetch(proxy);
-    const data = await res.json();
-    const parsed = JSON.parse(data.contents);
-    const result = parsed.chart.result[0];
-    const closes = result.indicators.quote[0].close.filter(Boolean);
-    const current = closes[closes.length - 1];
-    const prev = closes[closes.length - 2] || current;
-    const chg = ((current - prev) / prev * 100).toFixed(2);
-    const isUp = chg >= 0;
-    document.getElementById(valId).textContent = prefix + current.toFixed(2);
-    const el = document.getElementById(chgId);
-    el.textContent = (isUp ? '▲' : '▼') + Math.abs(chg) + '%';
-    el.className = 'commodity-chg ' + (isUp ? 'up' : 'down');
-  } catch(e) {
-    document.getElementById(valId).textContent = '—';
-  }
-}
-
-// ── TEMPO ──
-function updateTime() {
-  const now = new Date();
-  const str = now.toLocaleString('pt-BR', {timeZone:'America/Sao_Paulo', day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
-  document.getElementById('banner-time').textContent = str + ' (Brasília)';
-  document.getElementById('last-update').textContent = 'Última atualização: ' + str;
-}
-
-// ── INIT ──
-renderNews();
-updateTime();
-setInterval(updateTime, 60000);
-
-// Carregar mercados
-fetchMarket('^GSPC', 'sp500-val', 'sp500-chg', 'sp500-chart');
-fetchMarket('^BVSP', 'ibov-val', 'ibov-chg', 'ibov-chart');
-fetchMarket('^GDAXI', 'dax-val', 'dax-chg', 'dax-chart');
-fetchMarket('^N225', 'nikkei-val', 'nikkei-chg', 'nikkei-chart');
-fetchMarket('BRL=X', 'usd-val', 'usd-chg', 'usd-chart');
-
-// Commodities
-fetchCommodity('CL=F', 'oil-val', 'oil-chg', '$');
-fetchCommodity('GC=F', 'gold-val', 'gold-chg', '$');
-fetchCommodity('ZS=F', 'soy-val', 'soy-chg', '$');
-fetchCommodity('TIO=F', 'iron-val', 'iron-chg', '$');
-fetchCommodity('ZW=F', 'wheat-val', 'wheat-chg', '$');
+fetchMarket('^GSPC','sp500-v','sp500-ch','sp500-c');
+fetchMarket('^BVSP','ibov-v','ibov-ch','ibov-c');
+fetchMarket('^GDAXI','dax-v','dax-ch','dax-c');
+fetchMarket('^N225','nkk-v','nkk-ch','nkk-c');
+fetchMarket('BRL=X','usd-v','usd-ch','usd-c');
+fetchCom('CL=F','oil-v','oil-ch');fetchCom('GC=F','gold-v','gold-ch');
+fetchCom('ZS=F','soy-v','soy-ch');fetchCom('TIO=F','iron-v','iron-ch');fetchCom('ZW=F','wht-v','wht-ch');
 </script>
-</body>
-</html>
+</body></html>
