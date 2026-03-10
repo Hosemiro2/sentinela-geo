@@ -470,7 +470,7 @@ def publicar_portal(html, agora):
 
         # Atualiza remote com token
         subprocess.run(["git","remote","set-url","origin",
-            f"https://{token}@github.com/Hosemiro2/sentinela-geo.git"],capture_output=True)
+            f"https://x-access-token:{token}@github.com/Hosemiro2/sentinela-geo.git"],capture_output=True)
 
         subprocess.run(["git","add","index.html"],capture_output=True)
         result = subprocess.run(["git","commit","-m",f"Portal atualizado: {agora}"],capture_output=True,text=True)
