@@ -563,17 +563,20 @@ def main():
     hora = agora_dt.hour
     print(f"\n{'='*55}")
     print(f"  SENTINELA v4.0 - {agora} (horario Brasilia)")
-    if hora not in HORAS_COLETA and hora != HORA_RELATORIO:
+    # Detecta se foi acionado manualmente (GitHub Actions workflow_dispatch)
+    manual = os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch"
+
+    if hora not in HORAS_COLETA and hora != HORA_RELATORIO and not manual:
         print(f"  Hora {hora}h: fora do agendamento. Encerrando.")
         print(f"  Proximas execucoes: 08h, 13h, 18h (coleta) | 22h (relatorio)")
         print(f"{'='*55}\n")
         return
-    modo = "RELATORIO NOTURNO 22h" if hora==HORA_RELATORIO else f"COLETA SILENCIOSA {hora}h"
+    modo = "RELATORIO NOTURNO 22h" if (hora==HORA_RELATORIO or manual) else f"COLETA SILENCIOSA {hora}h"
     print(f"  Modo: {modo}")
     print(f"{'='*55}")
     resultados = ciclo_coleta(agora)
     relatorio = None
-    if hora == HORA_RELATORIO:
+    if hora == HORA_RELATORIO or manual:
         print("\n  Gerando relatorio consolidado...")
         relatorio = gerar_relatorio(resultados)
         if relatorio:
