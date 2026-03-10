@@ -16,7 +16,7 @@ load_dotenv()
 # ══════════════════════════════════════════════════════════════
 # CREDENCIAIS  (definidas no arquivo .env)
 # ══════════════════════════════════════════════════════════════
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_API_KEY")
 NEWS_API_KEY      = os.getenv("NEWS_API_KEY")
 TELEGRAM_TOKEN    = os.getenv("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID  = os.getenv("TELEGRAM_CHAT_ID")
