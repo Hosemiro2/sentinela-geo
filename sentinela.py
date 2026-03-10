@@ -598,7 +598,7 @@ function tick(){{
 tick(); setInterval(tick,1000);
 
 // NEWS DATA from Python
-const NEWS_DATA={news_json_placeholder};
+const NEWS_DATA={{news_json_placeholder}};
 const TCOLS={{"brasil_eua":"#C86820","russia_otan":"#C86820","europa":"#C86820","china_taiwan":"#C86820","indo_pacifico":"#B89000","oriente_medio":"#C86820","america_latina":"#B89000","africa":"#B89000","cyber":"#B89000"}};
 const TNAMES={{"brasil_eua":"Brasil×EUA","russia_otan":"Rússia×OTAN","europa":"Europa","china_taiwan":"China×Taiwan","indo_pacifico":"Indo-Pacífico","oriente_medio":"Or. Médio","america_latina":"Am. Latina","africa":"África","cyber":"Cyber"}};
 
