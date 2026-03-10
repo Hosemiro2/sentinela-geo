@@ -21,7 +21,7 @@ jobs:
         with:
           python-version: '3.11'
       - run: pip install anthropic requests feedparser python-dotenv
-      - run: python -c "import os; k=os.environ.get('ANTHROPIC_API_KEY',''); print(f'KEY EXISTE: {bool(k)} | TAMANHO: {len(k)}')"
+      - run: python -c "import os; k=os.environ.get('ANTHROPIC_API_KEY',''); print('KEY:', bool(k), len(k))"
       - run: python sentinela.py
       - if: always()
         uses: actions/upload-artifact@v4
@@ -29,6 +29,5 @@ jobs:
           name: logs-${{ github.run_number }}
           path: |
             log_sentinela.txt
-            snapshot_atual.json
             relatorio_*.txt
           retention-days: 30
