@@ -165,62 +165,116 @@ def gerar_relatorio(resultados):
 # ══════════════════════════════════════════════════════════════
 def gerar_html(resultados, relatorio, agora):
     ng = relatorio.get("nivel_global", 1) if relatorio else max(d["analise"]["nivel"] for d in resultados.values())
-    cor_global = CORES[ng]
-    label_global = LABELS[ng]
-    titulo_dia = relatorio.get("titulo_do_dia","") if relatorio else ""
-    narrativa = relatorio.get("narrativa","") if relatorio else ""
+    CORES_MAP = {1:"#287848",2:"#B89000",3:"#C86820",4:"#B83030",5:"#7B0000"}
+    LABELS_MAP = {1:"NORMAL",2:"ATENÇÃO",3:"ALERTA",4:"CRÍTICO",5:"CATÁSTROFE"}
+    cor_global = CORES_MAP[ng]
+    label_global = LABELS_MAP[ng]
+    titulo_dia   = relatorio.get("titulo_do_dia","") if relatorio else ""
+    narrativa    = relatorio.get("narrativa","") if relatorio else ""
     recomendacao = relatorio.get("recomendacao_familia","") if relatorio else ""
-    previsao = relatorio.get("previsao_24h","") if relatorio else ""
+    previsao     = relatorio.get("previsao_24h","") if relatorio else ""
     status_sitio = relatorio.get("status_sitio","") if relatorio else ""
     teatro_critico = relatorio.get("teatro_mais_critico","") if relatorio else ""
-    gatilhos = relatorio.get("gatilhos_ativos",[]) if relatorio else []
+    gatilhos     = relatorio.get("gatilhos_ativos",[]) if relatorio else []
     safehouse_alert = ng >= 3
+    teatros_alerta  = sum(1 for d in resultados.values() if d["analise"]["nivel"] >= 3)
+    total_fontes    = sum(len(d.get("noticias",[])) for d in resultados.values())
+    prob_conflito   = min(95, ng * 15 + teatros_alerta * 5)
 
-    # Cards dos teatros
+    # ── Marcadores do mapa ──────────────────────────────────────────────────
+    MAP_POS = {
+        "brasil_eua":    ("15%","70%"),
+        "russia_otan":   ("54%","22%"),
+        "europa":        ("47%","18%"),
+        "china_taiwan":  ("82%","38%"),
+        "indo_pacifico": ("88%","30%"),
+        "oriente_medio": ("60%","40%"),
+        "america_latina":("16%","58%"),
+        "africa":        ("47%","55%"),
+        "cyber":         ("50%","8%"),
+    }
+    THEATER_ICONS = {
+        "brasil_eua":"🇧🇷","russia_otan":"🇷🇺","europa":"🇪🇺",
+        "china_taiwan":"🇨🇳","indo_pacifico":"🌏","oriente_medio":"🕌",
+        "america_latina":"🌎","africa":"🌍","cyber":"🌐",
+    }
+    map_markers = ""
+    for tid, d in resultados.items():
+        if tid not in MAP_POS: continue
+        n = d["analise"]["nivel"]
+        c = CORES_MAP[n]
+        lx, ly = MAP_POS[tid]
+        nome = TEATROS[tid]["nome"]
+        icon = THEATER_ICONS.get(tid, "●")
+        map_markers += (
+            '<div class="t-marker" style="left:' + lx + ';top:' + ly + ';color:' + c + '">'
+            '<div class="t-ring"><div class="t-dot"></div></div>'
+            '<div class="t-tooltip">' + icon + ' ' + nome[:30] + ' NV ' + str(n) + '</div>'
+            '</div>'
+        )
+
+    # ── Cards dos teatros ───────────────────────────────────────────────────
+    TC_CLASS = {1:"tc-l1",2:"tc-l2",3:"tc-l3",4:"tc-l4",5:"tc-l4"}
     theater_cards = ""
     for tid, d in resultados.items():
         a = d["analise"]
         n = a["nivel"]
-        cor = CORES[n]
+        cor = CORES_MAP[n]
+        icon = THEATER_ICONS.get(tid,"●")
+        nome = TEATROS[tid]["nome"]
+        tendencia_icon = "↑" if a["tendencia"]=="deteriorando" else ("↓" if a["tendencia"]=="melhorando" else "→")
         noticias_html = ""
         for noticia in d.get("noticias",[])[:3]:
-            url = noticia.get("url","#")
-            fonte = noticia.get("fonte","")
-            titulo_n = noticia.get("titulo","")
-            noticias_html += f'<div class="news-item"><div class="news-bar" style="background:{cor}"></div><div class="news-body"><span class="news-src">{fonte}</span><a href="{url}" target="_blank" class="news-title">{titulo_n}</a></div></div>'
-        eventos_html = "".join(f"<li>{e}</li>" for e in a.get("eventos",[]))
-        tendencia_icon = "↑" if a["tendencia"]=="deteriorando" else ("↓" if a["tendencia"]=="melhorando" else "→")
-        theater_cards += f"""
-        <div class="theater-card" style="border-left:3px solid {cor}">
-          <div class="tc-header">
-            <div>
-              <div class="tc-name">{TEATROS[tid]['nome']}</div>
-              <div class="tc-level" style="color:{cor}">{n}/5 — {LABELS[n]}</div>
-            </div>
-            <div class="tc-num" style="color:{cor}">{n}</div>
-          </div>
-          <div class="tc-resumo">{a['resumo']}</div>
-          <div class="tc-kpis">
-            <span class="kpi-pill">Tendência {tendencia_icon}</span>
-            <span class="kpi-pill">Fontes: {len(d.get('noticias',[]))}</span>
-            <span class="kpi-pill">Peso: {TEATROS[tid]['peso']}</span>
-          </div>
-          {'<ul class="tc-eventos">' + eventos_html + '</ul>' if eventos_html else ''}
-          {('<div class="tc-news">' + noticias_html + '</div>') if noticias_html else ''}
-        </div>"""
+            url    = noticia.get("url","#")
+            fonte  = noticia.get("fonte","")
+            titulo_n = noticia.get("titulo","")[:90]
+            noticias_html += (
+                '<div class="tc-news-item">'
+                '<div class="tc-news-bar" style="background:' + cor + '"></div>'
+                '<div><span class="tc-news-src">' + fonte + '</span>'
+                '<a href="' + url + '" target="_blank" class="tc-news-title">' + titulo_n + '</a></div>'
+                '</div>'
+            )
+        tc_cls = TC_CLASS.get(n, 'tc-l1')
+        resumo = a.get("resumo","").replace('"','&quot;')
+        tend_cap = a["tendencia"].capitalize()
+        nf_count = len(d.get("noticias",[]))
+        peso = TEATROS[tid]["peso"]
+        news_block = ('<div class="tc-news">' + noticias_html + '</div>') if noticias_html else ""
+        theater_cards += (
+            '<div class="tc ' + tc_cls + '" data-num="' + str(n) + '">'
+            '<div class="tc-header">'
+            '<div class="tc-name">' + icon + ' ' + nome + '</div>'
+            '<div class="tc-score" style="color:' + cor + '">' + str(n) + '</div>'
+            '</div>'
+            '<div class="tc-resumo">' + resumo + '</div>'
+            '<div class="tc-meta">'
+            '<span class="tc-tag">' + tendencia_icon + ' ' + tend_cap + '</span>'
+            '<span class="tc-tag">' + str(nf_count) + ' fontes</span>'
+            '<span class="tc-tag">Peso ' + str(peso) + '</span>'
+            '</div>'
+            + news_block +
+            '</div>'
+        )
 
-    # Gatilhos
-    gatilhos_html = "".join(f"<li>⚡ {g}</li>" for g in gatilhos) if gatilhos else "<li>Nenhum gatilho ativo</li>"
+    # ── Gatilhos ─────────────────────────────────────────────────────────────
+    gatilhos_html = "".join(f'<div class="log-row"><div class="log-icon">⚡</div><div class="log-body"><div class="log-text">{g}</div><div class="log-time">{agora}</div></div></div>' for g in gatilhos) if gatilhos else '<div class="log-row"><div class="log-icon">✅</div><div class="log-body"><div class="log-text">Nenhum gatilho ativo</div></div></div>'
 
-    # Contagens KPI
-    teatros_alerta = sum(1 for d in resultados.values() if d["analise"]["nivel"] >= 3)
-    total_fontes = sum(len(d.get("noticias",[])) for d in resultados.values())
-    prob_conflito = min(95, ng * 15 + teatros_alerta * 5)
+    # ── Safehouse ─────────────────────────────────────────────────────────────
+    if safehouse_alert:
+        sh_class = "safehouse safehouse-danger"
+        sh_text  = "🔴 PROTOCOLO ATIVO — MOVA FAMÍLIA PARA SAPUCAÍ MIRIM IMEDIATAMENTE"
+    else:
+        sh_class = "safehouse safehouse-ok"
+        sh_text  = f"🟢 SAPUCAÍ MIRIM: STATUS OK — {status_sitio}"
 
-    safehouse_html = f"""<div class="safehouse-alert {'safehouse-danger' if safehouse_alert else 'safehouse-ok'}">
-      {'🔴 PROTOCOLO ACIONADO — MOVA FAMÍLIA PARA SAPUCAÍ MIRIM IMEDIATAMENTE' if safehouse_alert else '🟢 SAPUCAÍ MIRIM: STATUS OK — Sem necessidade de ação imediata'}
-    </div>""" if safehouse_alert else f"""<div class="safehouse-alert safehouse-ok">🟢 SAPUCAÍ MIRIM: STATUS OK — {status_sitio}</div>"""
+    # ── Cor RGB para gradiente ────────────────────────────────────────────────
+    h = cor_global.lstrip("#")
+    rgb = f"{int(h[0:2],16)},{int(h[2:4],16)},{int(h[4:6],16)}"
 
+    # ════════════════════════════════════════════════════════════════════════════
+    #  HTML PREMIUM
+    # ════════════════════════════════════════════════════════════════════════════
     html = f"""<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -228,231 +282,423 @@ def gerar_html(resultados, relatorio, agora):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="refresh" content="3600">
 <title>SENTINELA — Monitor Geopolítico Global</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600;900&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-:root{{--gold:#C9A84C;--gold-dim:#5A4820;--black:#060606;--b2:#0E0E0E;--b3:#161616;--b4:#1E1E1E;--b5:#262626;--white:#F0EAD6;--white-dim:#7A7060;--red:#C0392B;--orange:#E07020;--yellow:#C9A000;--green:#27AE60;}}
+:root{{
+  --gold:#C9A84C;--gold-light:#E8C97A;--gold-dim:#6B5420;--gold-glow:rgba(201,168,76,0.15);
+  --black:#040404;--b1:#080808;--b2:#0C0C0C;--b3:#121212;--b4:#181818;--b5:#202020;--b6:#2A2A2A;
+  --cream:#F0E8D0;--cream-dim:#9A9080;
+  --red:#B83030;--orange:#C86820;--yellow:#B89000;--green:#287848;
+}}
 *{{margin:0;padding:0;box-sizing:border-box;}}
-body{{background:var(--black);color:var(--white);font-family:'Crimson Pro',serif;font-size:16px;line-height:1.6;}}
-header{{position:sticky;top:0;z-index:500;background:rgba(6,6,6,.97);backdrop-filter:blur(16px);border-bottom:1px solid var(--gold-dim);display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:58px;}}
-.logo{{font-family:'Cinzel',serif;font-size:19px;font-weight:900;letter-spacing:.16em;color:var(--gold);display:flex;align-items:center;gap:10px;}}
-.logo svg{{width:26px;height:26px;}}
-nav a{{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.1em;color:var(--white-dim);text-decoration:none;padding:5px 11px;border:1px solid transparent;transition:all .2s;margin-left:2px;}}
-nav a:hover{{color:var(--gold);border-color:var(--gold-dim);}}
-.live{{display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold);}}
-.live-dot{{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:blink 2s infinite;}}
-@keyframes blink{{0%,100%{{opacity:1;}}50%{{opacity:.2;}}}}
-.banner{{background:linear-gradient(90deg,rgba({",".join(str(int(cor_global.lstrip("#")[i:i+2],16)) for i in (0,2,4))},0.12),rgba(201,168,76,0.03));border-bottom:1px solid rgba({",".join(str(int(cor_global.lstrip("#")[i:i+2],16)) for i in (0,2,4))},0.3);padding:10px 28px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}}
-.badge{{background:{cor_global};color:#000;font-weight:700;padding:2px 10px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.08em;}}
-.banner-text{{font-style:italic;flex:1;font-size:14px;opacity:.85;}}
-.banner-time{{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--white-dim);white-space:nowrap;}}
-.layout{{display:grid;grid-template-columns:1fr 320px;min-height:calc(100vh - 80px);}}
-.main{{border-right:1px solid var(--b4);}}
-.sidebar{{background:var(--b2);}}
-.sec-head{{padding:14px 24px;border-bottom:1px solid var(--b4);display:flex;align-items:center;justify-content:space-between;}}
-.sec-title{{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;display:flex;align-items:center;gap:8px;}}
-.sec-title::before{{content:'';width:14px;height:1px;background:var(--gold);}}
-.sec-meta{{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--white-dim);}}
-.kpi-grid{{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--b4);border-bottom:1px solid var(--b4);}}
-.kpi-card{{background:var(--black);padding:18px 16px;text-align:center;}}
-.kpi-icon{{font-size:20px;margin-bottom:6px;}}
-.kpi-value{{font-family:'Cinzel',serif;font-size:26px;color:var(--gold);line-height:1;}}
-.kpi-label{{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--white-dim);letter-spacing:.08em;margin-top:5px;text-transform:uppercase;}}
-.kpi-sub{{font-size:11px;color:var(--white-dim);margin-top:3px;font-style:italic;}}
-.theater-card{{padding:16px 24px;border-bottom:1px solid var(--b3);transition:background .15s;}}
-.theater-card:hover{{background:var(--b2);}}
-.tc-header{{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;}}
-.tc-name{{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.08em;color:var(--white-dim);text-transform:uppercase;}}
-.tc-level{{font-size:12px;margin-top:2px;}}
-.tc-num{{font-family:'Cinzel',serif;font-size:36px;font-weight:900;line-height:1;opacity:.6;}}
-.tc-resumo{{font-size:14px;color:var(--white);margin-bottom:8px;font-style:italic;}}
-.tc-kpis{{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}}
-.kpi-pill{{font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 8px;border:1px solid var(--b5);color:var(--white-dim);}}
-.tc-eventos{{font-size:12px;color:var(--white-dim);padding-left:16px;margin-bottom:8px;}}
-.tc-eventos li{{margin-bottom:2px;}}
-.tc-news{{margin-top:8px;}}
-.news-item{{display:flex;gap:8px;margin-bottom:6px;}}
-.news-bar{{width:2px;flex-shrink:0;border-radius:1px;}}
-.news-body{{}}
-.news-src{{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--white-dim);display:block;}}
-.news-title{{font-size:12px;color:var(--white);text-decoration:none;line-height:1.3;display:block;}}
-.news-title:hover{{color:var(--gold);}}
-.narrativa-section{{padding:20px 24px;border-bottom:1px solid var(--b4);background:var(--b2);}}
-.narrativa-text{{font-size:15px;line-height:1.7;font-style:italic;color:var(--white);opacity:.9;margin-bottom:12px;}}
-.rec-box{{background:var(--b3);border-left:3px solid var(--gold);padding:12px 16px;font-size:14px;}}
-.rec-label{{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.12em;color:var(--gold);margin-bottom:4px;}}
-.gatilhos{{padding:16px 24px;border-bottom:1px solid var(--b4);}}
-.gatilhos ul{{list-style:none;font-size:13px;color:var(--white-dim);}}
-.gatilhos li{{padding:4px 0;border-bottom:1px solid var(--b3);}}
-.safehouse-alert{{padding:12px 24px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.08em;text-align:center;border-bottom:1px solid var(--b4);}}
-.safehouse-danger{{background:rgba(192,57,43,.2);color:#E74C3C;border-color:rgba(192,57,43,.4);animation:pulse-bg 2s infinite;}}
-.safehouse-ok{{background:rgba(39,174,96,.1);color:var(--green);border-color:rgba(39,174,96,.2);}}
-@keyframes pulse-bg{{0%,100%{{opacity:1;}}50%{{opacity:.7;}}}}
-.market-section{{padding:16px 16px 0;}}
-.market-title{{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.14em;color:var(--gold);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:7px;}}
-.market-title::before{{content:'';width:10px;height:1px;background:var(--gold);}}
-.market-item{{padding:10px 0;border-bottom:1px solid var(--b3);display:flex;align-items:center;justify-content:space-between;}}
-.market-name{{font-family:'JetBrains Mono',monospace;font-size:11px;}}
-.market-sub{{font-size:10px;color:var(--white-dim);}}
-.price-val{{font-family:'JetBrains Mono',monospace;font-size:12px;text-align:right;}}
-.price-chg{{font-family:'JetBrains Mono',monospace;font-size:10px;text-align:right;}}
-.up{{color:#27AE60;}}.down{{color:var(--red);}}
-.commodity-item{{padding:9px 0;border-bottom:1px solid var(--b3);display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;}}
-.commodity-name{{font-size:13px;}}
-.commodity-price{{font-family:'JetBrains Mono',monospace;font-size:11px;text-align:right;}}
-.commodity-chg{{font-family:'JetBrains Mono',monospace;font-size:10px;text-align:right;min-width:48px;}}
-.alert-log{{padding:12px 16px;}}
-.log-item{{padding:8px 0;border-bottom:1px solid var(--b3);display:flex;gap:8px;}}
+html{{scroll-behavior:smooth;}}
+body{{background:var(--black);color:var(--cream);font-family:'EB Garamond',serif;font-size:16px;line-height:1.65;overflow-x:hidden;cursor:crosshair;}}
+body::before{{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:0.5;}}
+::-webkit-scrollbar{{width:4px;}}::-webkit-scrollbar-track{{background:var(--b1);}}::-webkit-scrollbar-thumb{{background:var(--gold-dim);}}
+/* HEADER */
+header{{position:sticky;top:0;z-index:200;background:rgba(4,4,4,0.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--gold-dim);height:56px;display:flex;align-items:center;padding:0 32px;gap:32px;}}
+.logo{{font-family:'Cinzel',serif;font-weight:900;font-size:18px;letter-spacing:0.25em;color:var(--gold);display:flex;align-items:center;gap:10px;white-space:nowrap;}}
+.logo-emblem{{width:30px;height:30px;border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);background:rgba(201,168,76,0.08);font-size:13px;animation:emblem-glow 4s ease-in-out infinite;}}
+@keyframes emblem-glow{{0%,100%{{box-shadow:0 0 0 rgba(201,168,76,0);}}50%{{box-shadow:0 0 12px rgba(201,168,76,0.3);}}}}
+nav{{display:flex;flex:1;justify-content:center;}}
+nav a{{font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.18em;color:var(--cream-dim);text-decoration:none;padding:6px 16px;border:1px solid transparent;transition:all 0.25s;text-transform:uppercase;}}
+nav a:hover{{color:var(--gold);border-color:var(--gold-dim);background:var(--gold-glow);}}
+.live-pill{{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;color:var(--gold);border:1px solid var(--gold-dim);padding:4px 10px;}}
+.pulse{{width:5px;height:5px;border-radius:50%;background:var(--gold);animation:pulse-dot 2s infinite;}}
+@keyframes pulse-dot{{0%,100%{{opacity:1;transform:scale(1);}}50%{{opacity:0.3;transform:scale(0.7);}}}}
+/* TICKER */
+.ticker{{background:linear-gradient(90deg,rgba({rgb},0.18),rgba(201,168,76,0.04),rgba({rgb},0.18));border-bottom:1px solid rgba({rgb},0.35);padding:0 32px;height:40px;display:flex;align-items:center;gap:20px;overflow:hidden;}}
+.ticker-label{{font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.15em;color:{cor_global};white-space:nowrap;display:flex;align-items:center;gap:8px;border-right:1px solid rgba({rgb},0.3);padding-right:20px;}}
+.ticker-badge{{background:{cor_global};color:#000;font-weight:700;padding:2px 8px;font-size:9px;letter-spacing:0.1em;}}
+.ticker-text{{font-style:italic;font-size:14px;color:var(--cream);opacity:0.9;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}}
+.ticker-time{{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--cream-dim);white-space:nowrap;}}
+/* HERO */
+.hero{{display:grid;grid-template-columns:1fr 340px;border-bottom:1px solid var(--b5);}}
+.map-panel{{position:relative;background:var(--b1);border-right:1px solid var(--b5);padding:24px 28px;overflow:hidden;}}
+.map-panel-title{{font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.2em;color:var(--gold);text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px;}}
+.map-panel-title::before{{content:'';width:20px;height:1px;background:var(--gold);}}
+.world-map-wrap{{position:relative;width:100%;aspect-ratio:2/1;max-height:320px;}}
+.world-map-wrap svg{{width:100%;height:100%;}}
+/* MAP MARKERS */
+.t-marker{{position:absolute;transform:translate(-50%,-50%);cursor:pointer;}}
+.t-ring{{width:16px;height:16px;border-radius:50%;border:2px solid currentColor;display:flex;align-items:center;justify-content:center;position:relative;animation:marker-pulse 3s ease-in-out infinite;}}
+.t-ring::before{{content:'';position:absolute;width:26px;height:26px;border-radius:50%;border:1px solid currentColor;opacity:0;animation:marker-ripple 3s ease-out infinite;}}
+.t-ring::after{{content:'';position:absolute;width:38px;height:38px;border-radius:50%;border:1px solid currentColor;opacity:0;animation:marker-ripple 3s ease-out infinite 0.5s;}}
+.t-dot{{width:6px;height:6px;border-radius:50%;background:currentColor;}}
+@keyframes marker-pulse{{0%,100%{{transform:scale(1);}}50%{{transform:scale(1.15);}}}}
+@keyframes marker-ripple{{0%{{transform:scale(0.4);opacity:0.8;}}100%{{transform:scale(1.6);opacity:0;}}}}
+.t-tooltip{{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);background:var(--b3);border:1px solid var(--gold-dim);padding:5px 10px;font-family:'JetBrains Mono',monospace;font-size:8px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity 0.2s;z-index:10;letter-spacing:0.05em;color:var(--cream);}}
+.t-marker:hover .t-tooltip{{opacity:1;}}
+.map-legend{{position:absolute;bottom:20px;right:20px;display:flex;flex-direction:column;gap:4px;}}
+.legend-item{{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.05em;}}
+.legend-dot{{width:8px;height:8px;border-radius:50%;border:1.5px solid;}}
+/* STATUS PANEL */
+.status-panel{{padding:24px 20px;display:flex;flex-direction:column;gap:0;}}
+.status-title{{font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.2em;color:var(--gold);text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:8px;}}
+.status-title::before{{content:'';width:16px;height:1px;background:var(--gold);}}
+.global-level-display{{text-align:center;padding:24px 0;border:1px solid var(--b5);margin-bottom:16px;background:var(--b2);position:relative;overflow:hidden;}}
+.global-level-display::before{{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba({rgb},0.08) 0%,transparent 70%);pointer-events:none;}}
+.gl-num{{font-family:'Cinzel Decorative',serif;font-size:64px;line-height:1;color:{cor_global};text-shadow:0 0 40px rgba({rgb},0.4);}}
+.gl-label{{font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.25em;color:{cor_global};margin-top:4px;opacity:0.8;}}
+.gl-sublabel{{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--cream-dim);margin-top:8px;}}
+.kpi-pills{{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}}
+.kpi-pill{{background:var(--b3);border:1px solid var(--b5);padding:10px 12px;transition:border-color 0.2s;}}
+.kpi-pill:hover{{border-color:var(--gold-dim);}}
+.kpi-pill-val{{font-family:'Cinzel',serif;font-size:20px;color:var(--gold);line-height:1;}}
+.kpi-pill-lbl{{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--cream-dim);letter-spacing:0.08em;margin-top:4px;text-transform:uppercase;}}
+.safehouse{{padding:14px 16px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.1em;text-align:center;border:1px solid;text-transform:uppercase;}}
+.safehouse-danger{{background:rgba(184,48,48,0.12);border-color:rgba(184,48,48,0.5);color:#E05050;animation:danger-pulse 2.5s infinite;}}
+.safehouse-ok{{background:rgba(40,120,72,0.1);border-color:rgba(40,120,72,0.4);color:#50B880;}}
+@keyframes danger-pulse{{0%,100%{{opacity:1;}}50%{{opacity:0.7;}}}}
+/* ANALYSIS */
+.analysis-strip{{background:var(--b2);border-bottom:1px solid var(--b5);padding:24px 32px;display:grid;grid-template-columns:1fr 1fr;gap:24px;}}
+.analysis-block{{border-left:2px solid var(--gold-dim);padding-left:16px;}}
+.analysis-label{{font-family:'Cinzel',serif;font-size:8px;letter-spacing:0.2em;color:var(--gold);text-transform:uppercase;margin-bottom:8px;}}
+.analysis-text{{font-size:15px;font-style:italic;line-height:1.6;color:var(--cream);opacity:0.9;}}
+.rec-box{{background:var(--b3);border-left:3px solid var(--gold);padding:12px 16px;margin-top:12px;}}
+.rec-label{{font-family:'Cinzel',serif;font-size:8px;letter-spacing:0.15em;color:var(--gold);margin-bottom:6px;text-transform:uppercase;}}
+/* THEATERS */
+.section-header{{padding:16px 32px;border-bottom:1px solid var(--b5);display:flex;align-items:center;justify-content:space-between;}}
+.section-title{{font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.2em;color:var(--gold);text-transform:uppercase;display:flex;align-items:center;gap:10px;}}
+.section-title::before{{content:'';width:20px;height:1px;background:var(--gold);}}
+.section-meta{{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--cream-dim);}}
+.theaters-grid{{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--b5);}}
+.tc{{background:var(--black);padding:20px 24px;border-left:3px solid transparent;transition:background 0.2s;position:relative;overflow:hidden;}}
+.tc::after{{content:attr(data-num);position:absolute;right:-10px;bottom:-20px;font-family:'Cinzel Decorative',serif;font-size:80px;font-weight:700;opacity:0.04;line-height:1;pointer-events:none;}}
+.tc:hover{{background:var(--b2);}}
+.tc-l4{{border-left-color:var(--red);}}
+.tc-l3{{border-left-color:var(--orange);}}
+.tc-l2{{border-left-color:var(--yellow);}}
+.tc-l1{{border-left-color:var(--green);}}
+.tc-header{{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}}
+.tc-name{{font-family:'Cinzel',serif;font-size:8px;letter-spacing:0.12em;color:var(--cream-dim);text-transform:uppercase;line-height:1.4;flex:1;padding-right:8px;}}
+.tc-score{{font-family:'Cinzel Decorative',serif;font-size:32px;line-height:1;font-weight:700;}}
+.tc-resumo{{font-size:13px;font-style:italic;color:var(--cream);opacity:0.75;line-height:1.45;margin-bottom:10px;}}
+.tc-meta{{display:flex;gap:8px;flex-wrap:wrap;}}
+.tc-tag{{font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 7px;border:1px solid var(--b6);color:var(--cream-dim);letter-spacing:0.05em;}}
+.tc-news{{margin-top:12px;border-top:1px solid var(--b4);padding-top:10px;}}
+.tc-news-item{{display:flex;gap:8px;margin-bottom:7px;}}
+.tc-news-bar{{width:2px;border-radius:1px;flex-shrink:0;margin-top:3px;min-height:14px;}}
+.tc-news-src{{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--cream-dim);display:block;margin-bottom:1px;}}
+.tc-news-title{{font-size:11px;color:var(--cream);text-decoration:none;line-height:1.35;display:block;opacity:0.8;transition:opacity 0.15s;}}
+.tc-news-title:hover{{opacity:1;color:var(--gold-light);}}
+/* BOTTOM GRID */
+.bottom-grid{{display:grid;grid-template-columns:320px 1fr;border-bottom:1px solid var(--b5);min-height:500px;}}
+.markets-panel{{background:var(--b1);border-right:1px solid var(--b5);overflow-y:auto;}}
+.mkts-section{{padding:20px 20px 16px;}}
+.mkts-title{{font-family:'Cinzel',serif;font-size:8px;letter-spacing:0.18em;color:var(--gold);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px;}}
+.mkts-title::before{{content:'';width:12px;height:1px;background:var(--gold);}}
+.mkt-row{{padding:11px 0;border-bottom:1px solid var(--b3);display:grid;grid-template-columns:1fr 50px auto;gap:8px;align-items:center;}}
+.mkt-name{{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cream);}}
+.mkt-sub{{font-size:10px;color:var(--cream-dim);margin-top:1px;}}
+.mkt-price{{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--cream);text-align:right;}}
+.mkt-chg{{font-family:'JetBrains Mono',monospace;font-size:9px;margin-top:1px;text-align:right;}}
+.up{{color:#50B878;}}.dn{{color:#C85050;}}
+.com-row{{padding:9px 0;border-bottom:1px solid var(--b3);display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;}}
+.com-name{{font-size:13px;}}
+.com-price{{font-family:'JetBrains Mono',monospace;font-size:11px;text-align:right;}}
+.com-chg{{font-family:'JetBrains Mono',monospace;font-size:9px;text-align:right;min-width:46px;}}
+/* LOG */
+.log-row{{padding:9px 0;border-bottom:1px solid var(--b3);display:flex;gap:10px;align-items:flex-start;}}
+.log-icon{{font-size:13px;flex-shrink:0;}}
 .log-text{{font-size:12px;line-height:1.4;}}
-.log-time{{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--white-dim);margin-top:2px;}}
-footer{{border-top:1px solid var(--gold-dim);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;background:var(--b2);}}
-.footer-logo{{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.14em;color:var(--gold-dim);}}
-.footer-info{{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--white-dim);text-align:right;}}
-canvas.sparkline{{display:block;}}
-@media(max-width:860px){{.layout{{grid-template-columns:1fr;}}.kpi-grid{{grid-template-columns:repeat(2,1fr);}}}}
+.log-time{{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--cream-dim);margin-top:2px;}}
+/* NEWS FEED */
+.news-panel{{overflow-y:auto;}}
+.news-filters{{padding:12px 24px;border-bottom:1px solid var(--b5);display:flex;gap:6px;flex-wrap:wrap;}}
+.filter-btn{{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.08em;padding:4px 10px;border:1px solid var(--b5);background:transparent;color:var(--cream-dim);cursor:pointer;transition:all 0.15s;text-transform:uppercase;}}
+.filter-btn:hover,.filter-btn.active{{border-color:var(--gold-dim);color:var(--gold);background:var(--gold-glow);}}
+.news-card{{padding:16px 24px;border-bottom:1px solid var(--b3);display:grid;grid-template-columns:3px 1fr;gap:14px;transition:background 0.15s;cursor:pointer;}}
+.news-card:hover{{background:var(--b2);}}
+.news-accent{{border-radius:1px;}}
+.news-meta{{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;}}
+.news-theater{{font-family:'Cinzel',serif;font-size:8px;letter-spacing:0.12em;color:var(--gold);text-transform:uppercase;}}
+.news-source{{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--cream-dim);padding:1px 6px;border:1px solid var(--b5);}}
+.news-time{{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--b6);margin-left:auto;}}
+.news-title{{font-size:15px;color:var(--cream);line-height:1.4;margin-bottom:4px;}}
+.news-summary{{font-size:12px;font-style:italic;color:var(--cream-dim);line-height:1.4;}}
+.news-link{{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--gold-dim);text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-top:6px;transition:color 0.15s;}}
+.news-link:hover{{color:var(--gold);}}
+/* FOOTER */
+footer{{border-top:1px solid var(--gold-dim);background:var(--b2);padding:20px 32px;display:flex;align-items:center;justify-content:space-between;}}
+.footer-brand{{font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.18em;color:var(--gold-dim);}}
+.footer-info{{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--cream-dim);text-align:right;line-height:1.6;}}
+/* ANIMATIONS */
+@keyframes fadeIn{{from{{opacity:0;transform:translateY(8px);}}to{{opacity:1;transform:translateY(0);}}}}
+.tc{{animation:fadeIn 0.4s ease both;}}
+.tc:nth-child(1){{animation-delay:.05s}}.tc:nth-child(2){{animation-delay:.1s}}.tc:nth-child(3){{animation-delay:.15s}}
+.tc:nth-child(4){{animation-delay:.2s}}.tc:nth-child(5){{animation-delay:.25s}}.tc:nth-child(6){{animation-delay:.3s}}
+.tc:nth-child(7){{animation-delay:.35s}}.tc:nth-child(8){{animation-delay:.4s}}.tc:nth-child(9){{animation-delay:.45s}}
+@media(max-width:1100px){{.hero{{grid-template-columns:1fr;}}.theaters-grid{{grid-template-columns:repeat(2,1fr);}}.bottom-grid{{grid-template-columns:1fr;}}}}
+@media(max-width:700px){{.theaters-grid{{grid-template-columns:1fr;}}.analysis-strip{{grid-template-columns:1fr;}}}}
 </style>
 </head>
 <body>
 <header>
-  <div class="logo">
-    <svg viewBox="0 0 28 28" fill="none"><path d="M14 2L26 7V15C26 21 20 26 14 27C8 26 2 21 2 15V7L14 2Z" stroke="#C9A84C" stroke-width="1.5" fill="rgba(201,168,76,0.08)"/><path d="M9 14L12 17L19 11" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    SENTINELA
-  </div>
+  <div class="logo"><div class="logo-emblem">🛡</div>SENTINELA</div>
   <nav>
-    <a href="#kpis">KPIs</a>
-    <a href="#teatros">Teatros</a>
-    <a href="#noticias">Notícias</a>
-    <a href="#mercados">Mercados</a>
+    <a href="#mapa">Mapa</a><a href="#teatros">Teatros</a>
+    <a href="#noticias">Notícias</a><a href="#mercados">Mercados</a>
   </nav>
-  <div class="live"><div class="live-dot"></div>AO VIVO</div>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <div class="live-pill"><div class="pulse"></div>AO VIVO</div>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--cream-dim)" id="hdr-t">—</span>
+  </div>
 </header>
-
-<div class="banner">
-  <span class="badge">NÍVEL {ng}/5 — {label_global}</span>
-  <div class="banner-text">{titulo_dia}</div>
-  <div class="banner-time">{agora} (Brasília)</div>
+<div class="ticker">
+  <div class="ticker-label"><span class="ticker-badge">NÍV {ng}/5</span> {label_global}</div>
+  <div class="ticker-text">{titulo_dia}</div>
+  <div class="ticker-time">{agora} (Brasília)</div>
 </div>
-
-<div class="layout">
-<div class="main">
-
-  <!-- SAFEHOUSE -->
-  {safehouse_html}
-
-  <!-- KPIs -->
-  <div id="kpis">
-    <div class="sec-head"><div class="sec-title">Indicadores Globais</div><div class="sec-meta">Atualizado: {agora}</div></div>
-    <div class="kpi-grid">
-      <div class="kpi-card"><div class="kpi-icon">🛡️</div><div class="kpi-value" style="color:{cor_global}">{ng}/5</div><div class="kpi-label">Nível Global</div><div class="kpi-sub">{label_global}</div></div>
-      <div class="kpi-card"><div class="kpi-icon">⚡</div><div class="kpi-value">{teatros_alerta}</div><div class="kpi-label">Teatros em Alerta</div><div class="kpi-sub">de 9 monitorados</div></div>
-      <div class="kpi-card"><div class="kpi-icon">📡</div><div class="kpi-value">{total_fontes}</div><div class="kpi-label">Fontes Coletadas</div><div class="kpi-sub">Últimas 24h</div></div>
-      <div class="kpi-card"><div class="kpi-icon">📈</div><div class="kpi-value" style="color:{'var(--red)' if prob_conflito>60 else 'var(--yellow)'}">{prob_conflito}%</div><div class="kpi-label">Prob. Escalada</div><div class="kpi-sub">Score composto</div></div>
-      <div class="kpi-card"><div class="kpi-icon">🎯</div><div class="kpi-value" style="font-size:14px;padding-top:4px">{teatro_critico[:20]}</div><div class="kpi-label">Teatro Crítico</div><div class="kpi-sub">Maior risco hoje</div></div>
-      <div class="kpi-card"><div class="kpi-icon">🌐</div><div class="kpi-value">{"Alto" if teatros_alerta>=5 else "Médio" if teatros_alerta>=3 else "Baixo"}</div><div class="kpi-label">Contágio Regional</div><div class="kpi-sub">{teatros_alerta} teatros interligados</div></div>
-      <div class="kpi-card"><div class="kpi-icon">⏱️</div><div class="kpi-value" id="hora-local">—</div><div class="kpi-label">Hora Brasília</div><div class="kpi-sub">Tempo real</div></div>
-      <div class="kpi-card"><div class="kpi-icon">🏔️</div><div class="kpi-value" style="color:var(--green);font-size:18px;padding-top:4px">{"ATIVO" if ng>=3 else "OK"}</div><div class="kpi-label">Sapucaí Mirim</div><div class="kpi-sub">{"Protocolo ativo" if ng>=3 else "Posição estratégica"}</div></div>
+<!-- HERO -->
+<div class="hero" id="mapa">
+  <div class="map-panel">
+    <div class="map-panel-title">Mapa de Alertas Geopolíticos</div>
+    <div class="world-map-wrap">
+      <svg viewBox="0 0 960 500" xmlns="http://www.w3.org/2000/svg">
+        <rect width="960" height="500" fill="#080808"/>
+        <line x1="0" y1="250" x2="960" y2="250" stroke="#1a1a1a" stroke-width="0.5"/>
+        <line x1="480" y1="0" x2="480" y2="500" stroke="#1a1a1a" stroke-width="0.5"/>
+        <line x1="0" y1="125" x2="960" y2="125" stroke="#111" stroke-width="0.5" stroke-dasharray="4,8"/>
+        <line x1="0" y1="375" x2="960" y2="375" stroke="#111" stroke-width="0.5" stroke-dasharray="4,8"/>
+        <path d="M60 60 L75 55 L120 50 L190 48 L220 60 L245 80 L255 110 L245 145 L220 175 L195 200 L175 215 L155 230 L130 240 L105 245 L80 235 L65 210 L55 180 L50 150 L55 115 L60 85Z" fill="#1C1C1C" stroke="#2a2a2a" stroke-width="0.8"/>
+        <path d="M300 20 L340 15 L365 25 L375 45 L360 65 L330 72 L305 60 L295 40Z" fill="#161616" stroke="#222" stroke-width="0.5"/>
+        <path d="M148 270 L175 265 L210 270 L235 285 L250 310 L260 350 L255 395 L240 435 L215 460 L185 468 L160 455 L140 430 L125 395 L122 355 L130 315 L140 290Z" fill="#1C1C1C" stroke="#2a2a2a" stroke-width="0.8"/>
+        <path d="M148 270 L175 235 L195 250 L185 275 L165 285Z" fill="#1C1C1C" stroke="#2a2a2a" stroke-width="0.6"/>
+        <path d="M390 55 L430 50 L470 52 L500 60 L515 75 L520 100 L510 125 L490 140 L465 148 L440 145 L415 135 L395 115 L385 90 L387 70Z" fill="#1C1C1C" stroke="#2a2a2a" stroke-width="0.8"/>
+        <path d="M430 20 L455 15 L475 25 L480 50 L470 52 L450 48 L435 38Z" fill="#181818" stroke="#2a2a2a" stroke-width="0.6"/>
+        <path d="M500 40 L560 30 L620 28 L680 32 L730 40 L750 60 L745 85 L720 100 L680 110 L630 115 L580 110 L540 100 L510 90 L500 70Z" fill="#1C1C1C" stroke="#2a2a2a" stroke-width="0.8"/>
+        <path d="M680 32 L780 22 L870 20 L930 30 L950 50 L945 75 L920 90 L870 98 L810 100 L750 95 L720 100 L730 40Z" fill="#181818" stroke="#2a2a2a" stroke-width="0.6"/>
+        <path d="M390 155 L440 148 L490 148 L540 155 L580 162 L605 180 L615 210 L610 240 L590 255 L555 260 L510 258 L465 255 L425 248 L395 235 L378 210 L378 185Z" fill="#1C1C1C" stroke="#2a2a2a" stroke-width="0.8"/>
+        <path d="M395 235 L425 248 L465 255 L510 258 L555 260 L590 255 L610 280 L618 320 L610 365 L590 405 L555 435 L515 450 L475 455 L440 445 L410 420 L390 385 L378 340 L375 295 L380 260Z" fill="#1C1C1C" stroke="#2a2a2a" stroke-width="0.8"/>
+        <path d="M540 155 L580 148 L625 145 L660 155 L680 175 L685 205 L668 230 L640 245 L610 248 L580 240 L555 220 L540 195 L538 170Z" fill="#1C1C1C" stroke="#2a2a2a" stroke-width="0.8"/>
+        <path d="M580 200 L625 195 L660 200 L680 220 L685 255 L672 280 L645 295 L610 295 L585 275 L572 245 L570 220Z" fill="#181818" stroke="#2a2a2a" stroke-width="0.6"/>
+        <path d="M640 175 L690 168 L725 178 L745 205 L748 240 L738 270 L715 295 L685 305 L660 295 L645 268 L640 235 L638 200Z" fill="#1C1C1C" stroke="#2a2a2a" stroke-width="0.8"/>
+        <path d="M640 100 L700 90 L760 88 L810 95 L840 110 L838 140 L810 158 L770 165 L725 162 L685 158 L650 148 L635 128Z" fill="#181818" stroke="#2a2a2a" stroke-width="0.6"/>
+        <path d="M750 95 L820 88 L875 90 L915 100 L930 120 L928 150 L910 175 L880 192 L840 200 L800 198 L762 188 L740 165 L738 140 L745 115Z" fill="#1C1C1C" stroke="#2a2a2a" stroke-width="0.8"/>
+        <path d="M890 105 L910 100 L922 112 L918 132 L902 142 L888 132 L882 115Z" fill="#1C1C1C" stroke="#2a2a2a" stroke-width="0.6"/>
+        <path d="M800 195 L840 195 L875 205 L895 225 L890 255 L865 270 L835 268 L808 248 L795 220Z" fill="#181818" stroke="#2a2a2a" stroke-width="0.6"/>
+        <path d="M778 318 L840 308 L890 315 L925 335 L935 370 L920 405 L885 425 L840 430 L800 420 L770 400 L758 368 L758 340Z" fill="#181818" stroke="#2a2a2a" stroke-width="0.6"/>
+        <text x="12" y="254" font-family="monospace" font-size="7" fill="#222" letter-spacing="1">EQUADOR</text>
+      </svg>
+      <div style="position:absolute;inset:0;pointer-events:none;">
+        {map_markers}
+      </div>
+      <div class="map-legend">
+        <div class="legend-item" style="color:var(--red)"><div class="legend-dot" style="border-color:var(--red);background:rgba(184,48,48,0.2)"></div>Crítico 4-5/5</div>
+        <div class="legend-item" style="color:var(--orange)"><div class="legend-dot" style="border-color:var(--orange);background:rgba(200,104,32,0.2)"></div>Alerta 3/5</div>
+        <div class="legend-item" style="color:var(--yellow)"><div class="legend-dot" style="border-color:var(--yellow);background:rgba(184,144,0,0.2)"></div>Atenção 2/5</div>
+        <div class="legend-item" style="color:var(--green)"><div class="legend-dot" style="border-color:var(--green);background:rgba(40,120,72,0.2)"></div>Normal 1/5</div>
+      </div>
     </div>
   </div>
-
-  <!-- NARRATIVA -->
-  <div class="narrativa-section">
-    <div class="sec-title" style="margin-bottom:12px;">Análise do Dia</div>
-    <div class="narrativa-text">{narrativa}</div>
-    <div class="rec-box"><div class="rec-label">Ação Recomendada Hoje</div>{recomendacao}</div>
+  <!-- STATUS -->
+  <div class="status-panel">
+    <div class="status-title">Status Global</div>
+    <div class="global-level-display">
+      <div class="gl-num">{ng}</div>
+      <div class="gl-label">{label_global}</div>
+      <div class="gl-sublabel" id="upd-t">Atualizado: {agora}</div>
+    </div>
+    <div class="kpi-pills">
+      <div class="kpi-pill">
+        <div class="kpi-pill-val" style="color:{cor_global}">{teatros_alerta}</div>
+        <div class="kpi-pill-lbl">Teatros em Alerta</div>
+      </div>
+      <div class="kpi-pill">
+        <div class="kpi-pill-val">{total_fontes}</div>
+        <div class="kpi-pill-lbl">Fontes Coletadas</div>
+      </div>
+      <div class="kpi-pill">
+        <div class="kpi-pill-val" style="color:{'var(--red)' if prob_conflito>60 else 'var(--yellow)'};font-size:16px">{prob_conflito}%</div>
+        <div class="kpi-pill-lbl">Prob. Escalada</div>
+      </div>
+      <div class="kpi-pill">
+        <div class="kpi-pill-val" id="hora-p" style="font-size:14px;padding-top:3px">—</div>
+        <div class="kpi-pill-lbl">Hora Brasília</div>
+      </div>
+    </div>
+    <div class="{sh_class}">{sh_text}</div>
   </div>
-
-  <!-- GATILHOS -->
-  <div class="gatilhos">
-    <div class="sec-head" style="padding:0;border:0;margin-bottom:10px;"><div class="sec-title">Gatilhos Ativos</div></div>
-    <ul>{gatilhos_html}</ul>
+</div>
+<!-- ANALYSIS -->
+<div class="analysis-strip">
+  <div class="analysis-block">
+    <div class="analysis-label">Análise do Dia</div>
+    <div class="analysis-text">{narrativa}</div>
   </div>
-
-  <!-- TEATROS -->
-  <div id="teatros">
-    <div class="sec-head"><div class="sec-title">9 Teatros Geopolíticos</div></div>
-    {theater_cards}
-  </div>
-
-</div><!-- /main -->
-
-<!-- SIDEBAR -->
-<div class="sidebar" id="mercados">
-  <div class="sec-head" style="background:var(--b2);"><div class="sec-title">Mercados</div><div class="live" style="font-size:9px;"><div class="live-dot" style="width:5px;height:5px;"></div>Tempo real</div></div>
-  <div class="market-section">
-    <div class="market-title">Bolsas de Valores</div>
-    <div class="market-item"><div><div class="market-name">S&P 500</div><div class="market-sub">EUA · SPX</div></div><canvas class="sparkline" id="sp500-c" width="55" height="22"></canvas><div><div class="price-val" id="sp500-v">—</div><div class="price-chg" id="sp500-ch">—</div></div></div>
-    <div class="market-item"><div><div class="market-name">IBOVESPA</div><div class="market-sub">Brasil · IBOV</div></div><canvas class="sparkline" id="ibov-c" width="55" height="22"></canvas><div><div class="price-val" id="ibov-v">—</div><div class="price-chg" id="ibov-ch">—</div></div></div>
-    <div class="market-item"><div><div class="market-name">DAX</div><div class="market-sub">Alemanha</div></div><canvas class="sparkline" id="dax-c" width="55" height="22"></canvas><div><div class="price-val" id="dax-v">—</div><div class="price-chg" id="dax-ch">—</div></div></div>
-    <div class="market-item"><div><div class="market-name">Nikkei 225</div><div class="market-sub">Japão</div></div><canvas class="sparkline" id="nkk-c" width="55" height="22"></canvas><div><div class="price-val" id="nkk-v">—</div><div class="price-chg" id="nkk-ch">—</div></div></div>
-    <div class="market-item"><div><div class="market-name">USD/BRL</div><div class="market-sub">Câmbio</div></div><canvas class="sparkline" id="usd-c" width="55" height="22"></canvas><div><div class="price-val" id="usd-v">—</div><div class="price-chg" id="usd-ch">—</div></div></div>
-
-    <div class="market-title" style="margin-top:16px;">Commodities Estratégicas</div>
-    <div class="commodity-item"><div class="commodity-name">🛢️ Petróleo WTI</div><div class="commodity-price" id="oil-v">—</div><div class="commodity-chg" id="oil-ch">—</div></div>
-    <div class="commodity-item"><div class="commodity-name">🥇 Ouro</div><div class="commodity-price" id="gold-v">—</div><div class="commodity-chg" id="gold-ch">—</div></div>
-    <div class="commodity-item"><div class="commodity-name">🌽 Soja</div><div class="commodity-price" id="soy-v">—</div><div class="commodity-chg" id="soy-ch">—</div></div>
-    <div class="commodity-item"><div class="commodity-name">⚙️ Minério Ferro</div><div class="commodity-price" id="iron-v">—</div><div class="commodity-chg" id="iron-ch">—</div></div>
-    <div class="commodity-item"><div class="commodity-name">🌾 Trigo</div><div class="commodity-price" id="wht-v">—</div><div class="commodity-chg" id="wht-ch">—</div></div>
-
-    <div class="market-title" style="margin-top:16px;">Log de Alertas</div>
-    <div class="alert-log">
-      <div class="log-item"><div>{"🔴" if ng>=4 else "🟠" if ng>=3 else "🟡"}</div><div><div class="log-text">{titulo_dia[:80]}</div><div class="log-time">{agora}</div></div></div>
-      {"".join(f'<div class="log-item"><div>⚡</div><div><div class="log-text">{g}</div><div class="log-time">{agora}</div></div></div>' for g in gatilhos[:3])}
-      <div class="log-item"><div>📍</div><div><div class="log-text">{status_sitio[:80]}</div><div class="log-time">{agora}</div></div></div>
-      <div class="log-item"><div>🔮</div><div><div class="log-text">{previsao[:80]}</div><div class="log-time">Próx. 24h</div></div></div>
+  <div class="analysis-block">
+    <div class="analysis-label">Ação Recomendada</div>
+    <div class="analysis-text">{previsao}</div>
+    <div class="rec-box">
+      <div class="rec-label">Para Sua Família</div>
+      <div style="font-size:14px">{recomendacao}</div>
     </div>
   </div>
 </div>
-</div><!-- /layout -->
-
+<!-- THEATERS -->
+<div id="teatros" style="border-bottom:1px solid var(--b5)">
+  <div class="section-header">
+    <div class="section-title">9 Teatros Geopolíticos</div>
+    <div class="section-meta">Claude AI · {agora}</div>
+  </div>
+  <div class="theaters-grid">{theater_cards}</div>
+</div>
+<!-- BOTTOM GRID -->
+<div class="bottom-grid">
+  <div class="markets-panel" id="mercados">
+    <div class="section-header" style="background:var(--b1)">
+      <div class="section-title">Mercados</div>
+      <div class="live-pill" style="font-size:8px"><div class="pulse" style="width:4px;height:4px"></div>Tempo real</div>
+    </div>
+    <div class="mkts-section">
+      <div class="mkts-title">Bolsas de Valores</div>
+      <div class="mkt-row"><div><div class="mkt-name">S&P 500</div><div class="mkt-sub">EUA · SPX</div></div><canvas id="c-sp" width="50" height="20"></canvas><div style="text-align:right"><div class="mkt-price" id="v-sp">—</div><div class="mkt-chg" id="ch-sp">—</div></div></div>
+      <div class="mkt-row"><div><div class="mkt-name">IBOVESPA</div><div class="mkt-sub">Brasil</div></div><canvas id="c-ib" width="50" height="20"></canvas><div style="text-align:right"><div class="mkt-price" id="v-ib">—</div><div class="mkt-chg" id="ch-ib">—</div></div></div>
+      <div class="mkt-row"><div><div class="mkt-name">DAX</div><div class="mkt-sub">Alemanha</div></div><canvas id="c-dx" width="50" height="20"></canvas><div style="text-align:right"><div class="mkt-price" id="v-dx">—</div><div class="mkt-chg" id="ch-dx">—</div></div></div>
+      <div class="mkt-row"><div><div class="mkt-name">Nikkei 225</div><div class="mkt-sub">Japão</div></div><canvas id="c-nk" width="50" height="20"></canvas><div style="text-align:right"><div class="mkt-price" id="v-nk">—</div><div class="mkt-chg" id="ch-nk">—</div></div></div>
+      <div class="mkt-row"><div><div class="mkt-name">USD/BRL</div><div class="mkt-sub">Câmbio</div></div><canvas id="c-us" width="50" height="20"></canvas><div style="text-align:right"><div class="mkt-price" id="v-us">—</div><div class="mkt-chg" id="ch-us">—</div></div></div>
+      <div class="mkts-title" style="margin-top:20px">Commodities</div>
+      <div class="com-row"><div class="com-name">🛢️ Petróleo WTI</div><div class="com-price" id="v-oil">—</div><div class="com-chg" id="ch-oil">—</div></div>
+      <div class="com-row"><div class="com-name">🥇 Ouro</div><div class="com-price" id="v-gld">—</div><div class="com-chg" id="ch-gld">—</div></div>
+      <div class="com-row"><div class="com-name">🌽 Soja</div><div class="com-price" id="v-soy">—</div><div class="com-chg" id="ch-soy">—</div></div>
+      <div class="com-row"><div class="com-name">⚙️ Minério Ferro</div><div class="com-price" id="v-irf">—</div><div class="com-chg" id="ch-irf">—</div></div>
+      <div class="com-row"><div class="com-name">🌾 Trigo</div><div class="com-price" id="v-wht">—</div><div class="com-chg" id="ch-wht">—</div></div>
+      <div class="mkts-title" style="margin-top:20px">Log de Alertas</div>
+      <div style="padding-bottom:16px">
+        {gatilhos_html}
+        <div class="log-row"><div class="log-icon">📍</div><div class="log-body"><div class="log-text">{status_sitio[:90]}</div><div class="log-time">{agora}</div></div></div>
+      </div>
+    </div>
+  </div>
+  <!-- NEWS FEED -->
+  <div class="news-panel" id="noticias">
+    <div class="section-header">
+      <div class="section-title">Feed de Notícias</div>
+      <div class="section-meta">Fontes verificadas com links originais</div>
+    </div>
+    <div class="news-filters" id="nf">
+      <button class="filter-btn active" onclick="flt('all',this)">Todos</button>
+    </div>
+    <div id="nc"></div>
+  </div>
+</div>
 <footer>
-  <div class="footer-logo">🛡️ SENTINELA v4.0 — Monitor Geopolítico Global</div>
-  <div class="footer-info">Dados: NewsAPI + RSS · Análise: Claude AI<br>Atualizado 4× ao dia via GitHub Actions · {agora}</div>
+  <div class="footer-brand">🛡️ SENTINELA v4.0 — Monitor Geopolítico Global</div>
+  <div class="footer-info">NewsAPI + RSS · Claude AI · GitHub Actions<br>Atualizado 4× ao dia · hosemiro2.github.io/sentinela-geo · {agora}</div>
 </footer>
-
 <script>
-function updateTime(){{const n=new Date();document.getElementById('hora-local').textContent=n.toLocaleTimeString('pt-BR',{{timeZone:'America/Sao_Paulo',hour:'2-digit',minute:'2-digit'}});}}
-updateTime();setInterval(updateTime,10000);
+// CLOCK
+function tick(){{
+  const n=new Date();
+  const t=n.toLocaleTimeString('pt-BR',{{timeZone:'America/Sao_Paulo',hour:'2-digit',minute:'2-digit',second:'2-digit'}});
+  document.getElementById('hdr-t').textContent=t;
+  document.getElementById('hora-p').textContent=t;
+}}
+tick(); setInterval(tick,1000);
 
-async function fetchMarket(sym,vid,cid,cvs){{
+// NEWS DATA from Python
+const NEWS_DATA={news_json_placeholder};
+const TCOLS={{"brasil_eua":"#C86820","russia_otan":"#C86820","europa":"#C86820","china_taiwan":"#C86820","indo_pacifico":"#B89000","oriente_medio":"#C86820","america_latina":"#B89000","africa":"#B89000","cyber":"#B89000"}};
+const TNAMES={{"brasil_eua":"Brasil×EUA","russia_otan":"Rússia×OTAN","europa":"Europa","china_taiwan":"China×Taiwan","indo_pacifico":"Indo-Pacífico","oriente_medio":"Or. Médio","america_latina":"Am. Latina","africa":"África","cyber":"Cyber"}};
+
+let CF='all';
+function flt(f,btn){{
+  CF=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}}
+
+function render(){{
+  const data=CF==='all'?NEWS_DATA:NEWS_DATA.filter(n=>n.t===CF);
+  document.getElementById('nc').innerHTML=data.map(n=>`
+    <div class="news-card">
+      <div class="news-accent" style="background:${{TCOLS[n.t]||'var(--gold)'}}"></div>
+      <div class="news-body">
+        <div class="news-meta">
+          <span class="news-theater">${{TNAMES[n.t]||n.t}}</span>
+          <span class="news-source">${{n.s}}</span>
+          <span class="news-time">${{n.d}}</span>
+        </div>
+        <div class="news-title">${{n.h}}</div>
+        <div class="news-summary">${{n.x}}</div>
+        <a class="news-link" href="${{n.u}}" target="_blank">↗ Ver fonte original — ${{n.s}}</a>
+      </div>
+    </div>`).join('');
+}}
+
+// Build filter buttons
+const theaters=[...new Set(NEWS_DATA.map(n=>n.t))];
+const nf=document.getElementById('nf');
+theaters.forEach(t=>{{
+  const b=document.createElement('button');
+  b.className='filter-btn';
+  b.textContent=TNAMES[t]||t;
+  b.onclick=()=>flt(t,b);
+  nf.appendChild(b);
+}});
+render();
+
+// MARKETS
+function sparkline(id,data,up){{
+  const c=document.getElementById(id);if(!c)return;
+  const ctx=c.getContext('2d');c.width=50;c.height=20;
+  const mn=Math.min(...data),mx=Math.max(...data),rng=mx-mn||1;
+  ctx.clearRect(0,0,50,20);ctx.beginPath();
+  ctx.strokeStyle=up?'#50B878':'#C85050';ctx.lineWidth=1.5;
+  data.forEach((v,i)=>{{const x=(i/(data.length-1))*48+1,y=18-((v-mn)/rng*16);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}});
+  ctx.stroke();
+}}
+async function mkt(sym,vi,ci,cv){{
   try{{
-    const url=`https://query1.finance.yahoo.com/v8/finance/chart/${{sym}}?interval=1d&range=5d`;
-    const proxy=`https://api.allorigins.win/get?url=${{encodeURIComponent(url)}}`;
-    const r=await fetch(proxy);const data=await r.json();
-    const result=JSON.parse(data.contents).chart.result[0];
-    const closes=result.indicators.quote[0].close.filter(Boolean);
-    const cur=closes[closes.length-1],prev=closes[closes.length-2];
+    const r=await fetch(`https://api.allorigins.win/get?url=${{encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${{sym}}?interval=1d&range=5d`)}}`);
+    const d=JSON.parse((await r.json()).contents);
+    const cl=d.chart.result[0].indicators.quote[0].close.filter(Boolean);
+    const cur=cl[cl.length-1],prev=cl[cl.length-2];
     const chg=((cur-prev)/prev*100).toFixed(2);const up=chg>=0;
-    document.getElementById(vid).textContent=cur>10000?cur.toLocaleString('pt-BR',{{maximumFractionDigits:0}}):(sym.includes('BRL')?'R$ ':'')+cur.toFixed(2);
-    const el=document.getElementById(cid);el.textContent=(up?'▲':'▼')+Math.abs(chg)+'%';el.className='price-chg '+(up?'up':'down');
-    if(cvs){{const c=document.getElementById(cvs);if(c){{const ctx=c.getContext('2d');const mn=Math.min(...closes),mx=Math.max(...closes),rng=mx-mn||1;ctx.clearRect(0,0,55,22);ctx.beginPath();ctx.strokeStyle=up?'#27AE60':'#C0392B';ctx.lineWidth=1.5;closes.forEach((v,i)=>{{const x=(i/(closes.length-1))*53+1,y=20-((v-mn)/rng*18);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}});ctx.stroke();}}}}
+    document.getElementById(vi).textContent=cur>10000?cur.toLocaleString('pt-BR',{{maximumFractionDigits:0}}):(sym.includes('BRL')?'R$ ':'')+cur.toFixed(2);
+    const el=document.getElementById(ci);el.textContent=(up?'▲':'▼')+Math.abs(chg)+'%';el.className='mkt-chg '+(up?'up':'dn');
+    if(cv)sparkline(cv,cl,up);
   }}catch(e){{}}
 }}
-async function fetchCom(sym,vid,cid,pfx='$'){{
+async function com(sym,vi,ci){{
   try{{
-    const url=`https://query1.finance.yahoo.com/v8/finance/chart/${{sym}}?interval=1d&range=2d`;
-    const proxy=`https://api.allorigins.win/get?url=${{encodeURIComponent(url)}}`;
-    const r=await fetch(proxy);const data=await r.json();
-    const result=JSON.parse(data.contents).chart.result[0];
-    const closes=result.indicators.quote[0].close.filter(Boolean);
-    const cur=closes[closes.length-1],prev=closes[closes.length-2]||cur;
+    const r=await fetch(`https://api.allorigins.win/get?url=${{encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${{sym}}?interval=1d&range=2d`)}}`);
+    const d=JSON.parse((await r.json()).contents);
+    const cl=d.chart.result[0].indicators.quote[0].close.filter(Boolean);
+    const cur=cl[cl.length-1],prev=cl[cl.length-2]||cur;
     const chg=((cur-prev)/prev*100).toFixed(2);const up=chg>=0;
-    document.getElementById(vid).textContent=pfx+cur.toFixed(2);
-    const el=document.getElementById(cid);el.textContent=(up?'▲':'▼')+Math.abs(chg)+'%';el.className='commodity-chg '+(up?'up':'down');
+    document.getElementById(vi).textContent='$'+cur.toFixed(2);
+    const el=document.getElementById(ci);el.textContent=(up?'▲':'▼')+Math.abs(chg)+'%';el.className='com-chg '+(up?'up':'dn');
   }}catch(e){{}}
 }}
-fetchMarket('^GSPC','sp500-v','sp500-ch','sp500-c');
-fetchMarket('^BVSP','ibov-v','ibov-ch','ibov-c');
-fetchMarket('^GDAXI','dax-v','dax-ch','dax-c');
-fetchMarket('^N225','nkk-v','nkk-ch','nkk-c');
-fetchMarket('BRL=X','usd-v','usd-ch','usd-c');
-fetchCom('CL=F','oil-v','oil-ch');fetchCom('GC=F','gold-v','gold-ch');
-fetchCom('ZS=F','soy-v','soy-ch');fetchCom('TIO=F','iron-v','iron-ch');fetchCom('ZW=F','wht-v','wht-ch');
+mkt('^GSPC','v-sp','ch-sp','c-sp');mkt('^BVSP','v-ib','ch-ib','c-ib');
+mkt('^GDAXI','v-dx','ch-dx','c-dx');mkt('^N225','v-nk','ch-nk','c-nk');
+mkt('BRL=X','v-us','ch-us','c-us');
+com('CL=F','v-oil','ch-oil');com('GC=F','v-gld','ch-gld');com('ZS=F','v-soy','ch-soy');
+com('TIO=F','v-irf','ch-irf');com('ZW=F','v-wht','ch-wht');
 </script>
-</body></html>"""
+</body>
+</html>"""
+    # Inject news JSON
+    import json
+    news_list = []
+    THEATER_IDS = list(resultados.keys())
+    for tid, d in resultados.items():
+        for noticia in d.get("noticias", [])[:4]:
+            news_list.append({{
+                "t": tid,
+                "h": noticia.get("titulo","")[:120],
+                "s": noticia.get("fonte",""),
+                "u": noticia.get("url","#"),
+                "x": noticia.get("titulo","")[:160],
+                "d": agora,
+            }})
+    html = html.replace("{news_json_placeholder}", json.dumps(news_list, ensure_ascii=False))
     return html
 
-# ══════════════════════════════════════════════════════════════
-# GIT PUSH AUTOMATICO
-# ══════════════════════════════════════════════════════════════
+
 def publicar_portal(html, agora):
     try:
         with open("index.html", "w", encoding="utf-8") as f:
