@@ -687,14 +687,14 @@ com('TIO=F','v-irf','ch-irf');com('ZW=F','v-wht','ch-wht');
     THEATER_IDS = list(resultados.keys())
     for tid, d in resultados.items():
         for noticia in d.get("noticias", [])[:4]:
-            news_list.append({{
+            news_list.append({
                 "t": tid,
                 "h": noticia.get("titulo","")[:120],
                 "s": noticia.get("fonte",""),
                 "u": noticia.get("url","#"),
                 "x": noticia.get("titulo","")[:160],
                 "d": agora,
-            }})
+            })
     html = html.replace("{news_json_placeholder}", json.dumps(news_list, ensure_ascii=False))
     return html
 
